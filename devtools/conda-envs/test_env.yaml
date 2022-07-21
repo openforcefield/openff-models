@@ -1,20 +1,13 @@
-name: test
+name: openff-pydantic-test
 channels:
-
   - conda-forge
-
-  - defaults
 dependencies:
-    # Base depends
   - python
   - pip
-
-    # Testing
+  - pydantic <2.0.0a0
+  - openff-units
   - pytest
   - pytest-cov
+  - pytest-xdist
+  - pytest-randomly
   - codecov
-
-    # Pip-only installs
-  #- pip:
-  #  - codecov
-
