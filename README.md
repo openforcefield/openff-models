@@ -1,8 +1,8 @@
 openffpydantic
 ==============================
 [//]: # (Badges)
-[![GitHub Actions Build Status](https://github.com/REPLACE_WITH_OWNER_ACCOUNT/openffpydantic/workflows/CI/badge.svg)](https://github.com/REPLACE_WITH_OWNER_ACCOUNT/openffpydantic/actions?query=workflow%3ACI)
-[![codecov](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/openffpydantic/branch/master/graph/badge.svg)](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/openffpydantic/branch/master)
+[![GitHub Actions Build Status](https://github.com/mattwthompson/openff-pydantic/workflows/ci/badge.svg)](https://github.com/mattwthompson/openff-pydantic/actions?query=workflow%3Aci)
+[![codecov](https://codecov.io/gh/mattwthompson/openff-pydantic/branch/master/graph/badge.svg)](https://codecov.io/gh/mattwthompson/openff-pydantic/branch/master)
 
 
 Helper classes for Pydantic compatibility in the OpenFF stack
