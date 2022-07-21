@@ -1,1 +1,1 @@
-openffpydantic/_version.py export-subst
+openff/pydantic/_version.py export-subst

@@ -1,4 +1,4 @@
-openffpydantic
+openff-pydantic
 ==============================
 [//]: # (Badges)
 [![GitHub Actions Build Status](https://github.com/mattwthompson/openff-pydantic/workflows/ci/badge.svg)](https://github.com/mattwthompson/openff-pydantic/actions?query=workflow%3Aci)

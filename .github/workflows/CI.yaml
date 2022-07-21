@@ -58,7 +58,7 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest -v --cov=openffpydantic --cov-report=xml --color=yes openffpydantic/tests/
+        pytest -v --cov=openff/pydantic --cov-report=xml --color=yes openff/pydantic/tests/
 
     - name: CodeCov
       uses: codecov/codecov-action@v1
