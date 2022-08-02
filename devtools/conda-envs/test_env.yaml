@@ -1,4 +1,4 @@
-name: openff-pydantic-test
+name: openff-models-test
 channels:
   - conda-forge
 dependencies:
@@ -6,8 +6,10 @@ dependencies:
   - pip
   - pydantic <2.0.0a0
   - openff-units
+  - openff-utilities
   - pytest
   - pytest-cov
   - pytest-xdist
   - pytest-randomly
   - codecov
+  - openmm

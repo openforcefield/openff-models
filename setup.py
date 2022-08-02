@@ -1,5 +1,5 @@
 """
-openff-pydantic
+openff-models
 Helper classes for Pydantic compatibility in the OpenFF stack
 """
 import sys
@@ -20,7 +20,7 @@ except:
 
 
 setup(
-    name='openff-pydantic',
+    name='openff-models',
     author='Matt Thompson',
     author_email='matt.thompson@openforcefield.org',
     description=short_description,

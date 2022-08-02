@@ -1,1 +1,1 @@
-openff/pydantic/_version.py export-subst
+openff/models/_version.py export-subst

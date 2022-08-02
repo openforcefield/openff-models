@@ -7,8 +7,6 @@ on:
   pull_request:
     branches:
       - "main"
-  schedule:
-    - cron: "0 0 * * *"
 
 defaults:
   run:
@@ -38,7 +36,7 @@ jobs:
         python-version: "${{ matrix.python-version }}"
         environment-file: devtools/conda-envs/test_env.yaml
         channels: conda-forge,defaults
-        activate-environment: openff-pydantic-test
+        activate-environment: openff-models-test
         auto-update-conda: false
         auto-activate-base: false
         show-channel-urls: true
@@ -58,7 +56,7 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest -v --cov=openff/pydantic --cov-report=xml --color=yes openff/pydantic/tests/
+        pytest -v --cov=openff/models --cov-report=xml --color=yes openff/models/tests/
 
     - name: CodeCov
       uses: codecov/codecov-action@v1
