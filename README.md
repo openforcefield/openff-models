@@ -9,7 +9,7 @@ Helper classes for Pydantic compatibility in the OpenFF stack
 
 ### Getting started
 
-```python
+```python3
 import pprint
 import json
 
@@ -47,8 +47,9 @@ pprint.pprint(json.loads(atom.json()))
 # Can also roundtrip through these representations
 assert Atom(**atom.dict()).charge.m == 0.0
 assert Atom.parse_raw(atom.json()).charge.m == 0.0
-### Copyright
 ```
+
+### Copyright
 
 Copyright (c) 2022, Matt Thompson
 
