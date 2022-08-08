@@ -7,9 +7,9 @@ from openff.utilities.testing import skip_if_missing
 from openmm import unit as openmm_unit
 from pydantic import ValidationError
 
-from openff.interchange.exceptions import UnitValidationError
-from openff.interchange.models import DefaultModel
-from openff.interchange.types import ArrayQuantity, FloatQuantity
+from openff.models.exceptions import UnitValidationError
+from openff.models.models import DefaultModel
+from openff.models.types import ArrayQuantity, FloatQuantity
 
 
 class TestQuantityTypes:
@@ -236,7 +236,7 @@ class TestQuantityTypes:
 
 
 def test_from_omm_quantity():
-    from openff.interchange.types import _from_omm_quantity
+    from openff.models.types import _from_omm_quantity
 
     from_list = _from_omm_quantity([1, 0] * openmm_unit.second)
     from_array = _from_omm_quantity(np.asarray([1, 0]) * openmm_unit.second)

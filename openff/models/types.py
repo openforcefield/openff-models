@@ -9,7 +9,7 @@ from openff.units import unit
 from openff.utilities.utilities import has_package, requires_package
 from openmm import unit as openmm_unit
 
-from openff.interchange.exceptions import (
+from openff.models.exceptions import (
     MissingUnitError,
     UnitValidationError,
     UnsupportedExportError,
@@ -171,7 +171,8 @@ else:
                         f"Value {val} needs to be tagged with a unit"
                     )
                 elif isinstance(val, unit.Quantity):
-                    # Redundant cast? Maybe this handles pint vs openff.interchange.unit?
+                    # TODO: This might be a redundant cast causing wasted CPU time.
+                    #       But maybe it handles pint vs openff.units.unit?
                     return unit.Quantity(val)
                 elif isinstance(val, openmm_unit.Quantity):
                     return _from_omm_quantity(val)

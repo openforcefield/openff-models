@@ -1,13 +1,10 @@
 name: openff-models-test
 channels:
   - conda-forge
-  - conda-forge/label/openff-interchange_rc
-  - conda-forge/label/openff-toolkit_rc
 dependencies:
   - python
   - pip
   - pydantic <2.0.0a0
-  - openff-interchange
   - pytest
   - pytest-cov
   - pytest-xdist

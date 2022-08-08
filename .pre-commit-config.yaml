@@ -31,6 +31,6 @@ repos:
   rev: v2.37.1
   hooks:
   - id: pyupgrade
-    files: ^openff/interchange
-    exclude: openff/interchange/_version.py|setup.py
+    files: ^openff
+    exclude: openff/models/_version.py|setup.py
     args: [--py38-plus]
