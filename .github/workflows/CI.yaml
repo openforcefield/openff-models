@@ -31,19 +31,12 @@ jobs:
         df -h
         ulimit -a
 
-    - uses: conda-incubator/setup-miniconda@v2
+    - name: Install conda environment
+      uses: mamba-org/provision-with-micromamba@main
       with:
-        python-version: "${{ matrix.python-version }}"
         environment-file: devtools/conda-envs/test_env.yaml
-        channels: conda-forge,defaults
-        activate-environment: openff-models-test
-        auto-update-conda: false
-        auto-activate-base: false
-        show-channel-urls: true
-        mamba-version: "*"
-        miniforge-version: latest
-        miniforge-variant: Mambaforge
-        use-mamba: true
+      extra-specs: |
+        python=${{ matrix.python-version }}
 
     - name: Install package
       run: |
