@@ -5,6 +5,8 @@ dependencies:
   - python
   - pip
   - pydantic <2.0.0a0
+  - openff-units
+  - openff-utilities
   - pytest
   - pytest-cov
   - pytest-xdist
