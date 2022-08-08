@@ -8,8 +8,8 @@ from openmm import unit as openmm_unit
 from pydantic import ValidationError
 
 from openff.models.exceptions import UnitValidationError
-from openff.models.models import DefaultModel
 from openff.models.types import ArrayQuantity, FloatQuantity
+from openff.models.models import DefaultModel
 
 
 class TestQuantityTypes:

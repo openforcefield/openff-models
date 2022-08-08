@@ -4,7 +4,6 @@ import json
 from typing import TYPE_CHECKING, Any, Dict
 
 import numpy as np
-from openff.toolkit.utils.collections import ValidatedList
 from openff.units import unit
 from openff.utilities.utilities import has_package, requires_package
 from openmm import unit as openmm_unit
