@@ -22,6 +22,10 @@ class TestQuantityTypes:
             baz: FloatQuantity["nanometer"]
             qux: FloatQuantity["nanometer"]
             quux: int
+            fnord: float
+            fum: str
+            zot: list
+            fred: dict
 
         a = Atom(
             mass=4,
@@ -31,6 +35,10 @@ class TestQuantityTypes:
             baz=0.4 * openmm_unit.nanometer,
             qux=openmm_unit.Quantity(np.float64(0.4), openmm_unit.nanometer),
             quux=1,
+            fnord=4.2,
+            fum="fum",
+            zot=["zot", 1, 4.2],
+            fred={"baz": 2},
         )
 
         assert a.mass == 4 * unit.atomic_mass_constant
@@ -40,6 +48,10 @@ class TestQuantityTypes:
         assert a.baz == 0.4 * unit.nanometer
         assert a.qux == 0.4 * unit.nanometer
         assert a.quux == 1
+        assert a.fnord == 4.2
+        assert a.fum == "fum"
+        assert a.zot == ["zot", 1, 4.2]
+        assert a.fred == {"baz": 2}
 
         # TODO: Update with custom deserialization to == a.dict()
         assert json.loads(a.json()) == {
@@ -50,6 +62,10 @@ class TestQuantityTypes:
             "baz": '{"val": 0.4, "unit": "nanometer"}',
             "qux": '{"val": 0.4, "unit": "nanometer"}',
             "quux": 1,
+            "fnord": 4.2,
+            "fum": "fum",
+            "zot": ["zot", 1, 4.2],
+            "fred": {"baz": 2},
         }
 
         parsed = Atom.parse_raw(a.json())
