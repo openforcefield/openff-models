@@ -133,7 +133,7 @@ def json_loader(data: str) -> dict:
             # Directly look for an encoded FloatQuantity/ArrayQuantity,
             # which is itself a dict
             v = json.loads(val)
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, TypeError):
             # Handles some cases of the val being a primitive type
             continue
         # TODO: More gracefully parse non-FloatQuantity/ArrayQuantity dicts
