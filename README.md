@@ -49,6 +49,26 @@ assert Atom(**atom.dict()).charge.m == 0.0
 assert Atom.parse_raw(atom.json()).charge.m == 0.0
 ```
 
+Currently, models can also be defined with a simple `unit.Quantity` annotation. This keeps serialization functionality but does not pick up the validaiton features of the custom types, i.e. dimensionality validation.
+
+```python3
+import json
+
+from openff.units import unit
+from openff.models.models import DefaultModel
+
+
+class Atom(DefaultModel):
+    mass: unit.Quantity = unit.Quantity(0.0, unit.amu)
+
+json.loads(Atom(mass=12.011 * unit.atomic_mass_constant).json())
+# {'mass': '{"val": 12.011, "unit": "atomic_mass_constant"}'}
+
+# This model does have instructions to keep masses in mass units
+json.loads(Atom(mass=12.011 * unit.nanometer).json())
+# {'mass': '{"val": 12.011, "unit": "nanometer"}'}
+```
+
 ### Copyright
 
 Copyright (c) 2022, Matt Thompson
