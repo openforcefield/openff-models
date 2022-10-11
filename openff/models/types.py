@@ -124,22 +124,55 @@ def custom_quantity_encoder(v):
     return json.dumps(v, cls=QuantityEncoder)
 
 
+def dict_from_string(data):
+
+    if isinstance(data, dict):
+        result = {}
+        for key, value in data.items():
+            result[key] = dict_from_string(value)
+
+    elif isinstance(data, list):
+        result = []
+        for item in data:
+            result.append(dict_from_string(item))
+
+    elif isinstance(data, tuple):
+        aux = []
+        for item in data:
+            aux.append(dict_from_string(item))
+        result = tuple(aux)
+
+    elif isinstance(data, str):
+        try:
+            result = dict_from_string(json.loads(data))
+        except(json.JSONDecodeError):
+            result = data
+
+    elif isinstance(data, (int, float, type(None), bool)):
+        result = data
+
+    else:
+        raise ValueError("unexpected type")
+
+    return result
+
+
+def unitfy_dict(data):
+    for key, value in data.items():
+        if isinstance(value, dict):
+            if "val" in value:
+                unit_ = unit(value["unit"])
+                val = value["val"]
+                data[key] = unit_ * val
+            else:
+                data[key] = unitfy_dict(value)
+    return data
+
+
 def json_loader(data: str) -> dict:
     """Load JSON containing custom unit-tagged quantities."""
-    # TODO: recursively call this function for nested models
-    out: Dict = json.loads(data)
-    for key, val in out.items():
-        try:
-            # Directly look for an encoded FloatQuantity/ArrayQuantity,
-            # which is itself a dict
-            v = json.loads(val)
-        except (json.JSONDecodeError, TypeError):
-            # Handles some cases of the val being a primitive type
-            continue
-        # TODO: More gracefully parse non-FloatQuantity/ArrayQuantity dicts
-        unit_ = unit(v["unit"])
-        val = v["val"]
-        out[key] = unit_ * val
+    out = dict_from_string(data)
+    unitfy_dict(out)
     return out
 
 
