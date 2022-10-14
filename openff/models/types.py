@@ -124,6 +124,7 @@ def custom_quantity_encoder(v):
     return json.dumps(v, cls=QuantityEncoder)
 
 
+# Inspired from https://stackoverflow.com/a/47049015/2525806
 def dict_from_string(data):
 
     if isinstance(data, dict):
