@@ -17,13 +17,12 @@ jobs:
     name: Test on ${{ matrix.os }}, Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [macOS-latest, ubuntu-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10"]
         exclude:
           - python-version: "3.10"
-            os: macOS-latest
-          - python-version: "3.11"
             os: macOS-latest
 
     steps:
