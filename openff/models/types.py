@@ -1,11 +1,9 @@
 """Custom models for dealing with unit-bearing quantities in a Pydantic-compatible manner."""
-import collections
 import json
 from typing import TYPE_CHECKING, Any, Dict
 
 import numpy as np
 from openff.units import unit
-from openff.utilities.utilities import has_package, requires_package
 from openmm import unit as openmm_unit
 
 from openff.models.exceptions import (
@@ -91,7 +89,6 @@ def _from_omm_quantity(val: openmm_unit.Quantity):
             "Found a openmm.unit.Unit wrapped around something other than a float-like "
             f"or np.ndarray-like. Found a unit wrapped around type {type(val_)}."
         )
-
 
 
 class QuantityEncoder(json.JSONEncoder):
