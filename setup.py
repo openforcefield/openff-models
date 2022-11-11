@@ -21,8 +21,8 @@ except:
 
 setup(
     name='openff-models',
-    author='Matt Thompson',
-    author_email='matt.thompson@openforcefield.org',
+    author='Open Force Field Initiative',
+    author_email='info@openforcefield.org',
     description=short_description,
     long_description=long_description,
     long_description_content_type="text/markdown",
