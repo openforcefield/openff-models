@@ -1,7 +1,7 @@
 openff-models
 ==============================
 [//]: # (Badges)
-[![GitHub Actions Build Status](https://github.com/openforcefield/openff-models/workflows/CI/badge.svg)](https://github.com/openforcefield/openff-models/actions?query=workflow%3Aci)
+[![GitHub Actions Build Status](https://github.com/openforcefield/openff-models/workflows/ci/badge.svg)](https://github.com/openforcefield/openff-models/actions?query=workflow%3Aci)
 [![codecov](https://codecov.io/gh/openforcefield/openff-models/branch/main/graph/badge.svg)](https://codecov.io/gh/openforcefield/openff-models/branch/main)
 
 
