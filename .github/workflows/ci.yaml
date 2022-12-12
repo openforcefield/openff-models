@@ -51,6 +51,10 @@ jobs:
         conda info
         conda list
 
+    - name: Run mypy
+      run: |
+        mypy --show-error-codes -p "openff.models"
+
     - name: Run tests
       run: |
         pytest -v --cov=openff/models --cov-report=xml --color=yes openff/models/tests/

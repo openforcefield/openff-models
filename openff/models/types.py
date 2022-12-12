@@ -3,8 +3,8 @@ import json
 from typing import TYPE_CHECKING, Any, Dict
 
 import numpy as np
+import openmm.unit
 from openff.units import unit
-from openmm import unit as openmm_unit
 
 from openff.models.exceptions import (
     MissingUnitError,
@@ -41,7 +41,7 @@ else:
                     )
                 elif isinstance(val, unit.Quantity):
                     return unit.Quantity(val)
-                elif isinstance(val, openmm_unit.Quantity):
+                elif isinstance(val, openmm.unit.Quantity):
                     return _from_omm_quantity(val)
                 else:
                     raise UnitValidationError(
@@ -57,7 +57,7 @@ else:
                     # could return here, without converting
                     # (could be inconsistent with data model - heteregenous but compatible units)
                     # return val
-                if isinstance(val, openmm_unit.Quantity):
+                if isinstance(val, openmm.unit.Quantity):
                     return _from_omm_quantity(val).to(unit_)
                 if isinstance(val, (float, int)) and not isinstance(val, bool):
                     return val * unit_
@@ -69,11 +69,11 @@ else:
                 )
 
 
-def _from_omm_quantity(val: openmm_unit.Quantity):
+def _from_omm_quantity(val: openmm.unit.Quantity) -> unit.Quantity:
     """
     Convert float or array quantities tagged with SimTK/OpenMM units to a Pint-compatible quantity.
     """
-    unit_ = val.unit
+    unit_: openmm.unit.Unit = val.unit
     val_ = val.value_in_unit(unit_)
     if type(val_) in {float, int}:
         unit_ = val.unit
@@ -170,7 +170,7 @@ else:
                     # TODO: This might be a redundant cast causing wasted CPU time.
                     #       But maybe it handles pint vs openff.units.unit?
                     return unit.Quantity(val)
-                elif isinstance(val, openmm_unit.Quantity):
+                elif isinstance(val, openmm.unit.Quantity):
                     return _from_omm_quantity(val)
                 else:
                     raise UnitValidationError(
@@ -181,7 +181,7 @@ else:
                 if isinstance(val, unit.Quantity):
                     assert unit_.dimensionality == val.dimensionality
                     return val.to(unit_)
-                if isinstance(val, openmm_unit.Quantity):
+                if isinstance(val, openmm.unit.Quantity):
                     return _from_omm_quantity(val).to(unit_)
                 if isinstance(val, (np.ndarray, list)):
                     return val * unit_
