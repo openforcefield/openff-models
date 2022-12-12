@@ -3,8 +3,8 @@ import json
 from typing import TYPE_CHECKING, Any, Dict
 
 import numpy as np
-from openff.units import unit
 import openmm.unit
+from openff.units import unit
 
 from openff.models.exceptions import (
     MissingUnitError,
