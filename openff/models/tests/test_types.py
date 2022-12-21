@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 from openff.units import unit
 from openff.utilities.testing import skip_if_missing
-from openmm import unit as openmm_unit
 from pydantic import ValidationError
 
 from openff.models.exceptions import UnitValidationError
@@ -13,11 +12,15 @@ from openff.models.types import ArrayQuantity, FloatQuantity
 
 
 class TestQuantityTypes:
+    @skip_if_missing("openmm.unit")
     def test_float_quantity_model(self):
+        import openmm.unit
+
         class Atom(DefaultModel):
             mass: FloatQuantity["atomic_mass_constant"]
             charge: FloatQuantity["elementary_charge"]
             foo: FloatQuantity
+            fuu: FloatQuantity
             bar: FloatQuantity["degree"]
             baz: FloatQuantity["nanometer"]
             qux: FloatQuantity["nanometer"]
@@ -31,9 +34,10 @@ class TestQuantityTypes:
             mass=4,
             charge=0 * unit.elementary_charge,
             foo=2.0 * unit.nanometer,
+            fuu=2.0 * openmm.unit.nanometer,
             bar="90.0 degree",
-            baz=0.4 * openmm_unit.nanometer,
-            qux=openmm_unit.Quantity(np.float64(0.4), openmm_unit.nanometer),
+            baz=0.4 * openmm.unit.nanometer,
+            qux=openmm.unit.Quantity(np.float64(0.4), openmm.unit.nanometer),
             quux=1,
             fnord=4.2,
             fum="fum",
@@ -44,6 +48,7 @@ class TestQuantityTypes:
         assert a.mass == 4 * unit.atomic_mass_constant
         assert a.charge == 0 * unit.elementary_charge
         assert a.foo == 2.0 * unit.nanometer
+        assert a.fuu == 2.0 * unit.nanometer
         assert a.bar == 90 * unit.degree
         assert a.baz == 0.4 * unit.nanometer
         assert a.qux == 0.4 * unit.nanometer
@@ -58,6 +63,7 @@ class TestQuantityTypes:
             "mass": '{"val": 4, "unit": "atomic_mass_constant"}',
             "charge": '{"val": 0, "unit": "elementary_charge"}',
             "foo": '{"val": 2.0, "unit": "nanometer"}',
+            "fuu": '{"val": 2.0, "unit": "nanometer"}',
             "bar": '{"val": 90.0, "unit": "degree"}',
             "baz": '{"val": 0.4, "unit": "nanometer"}',
             "qux": '{"val": 0.4, "unit": "nanometer"}',
@@ -84,7 +90,10 @@ class TestQuantityTypes:
         ):
             Model(a=val)
 
+    @skip_if_missing("openmm.unit")
     def test_array_quantity_model(self):
+        import openmm.unit
+
         class Molecule(DefaultModel):
             masses: ArrayQuantity["atomic_mass_constant"]
             charges: ArrayQuantity["elementary_charge"]
@@ -96,7 +105,7 @@ class TestQuantityTypes:
         m = Molecule(
             masses=[16, 1, 1],
             charges=np.asarray([-1, 0.5, 0.5]),
-            other=[2.0, 2.0] * openmm_unit.second,
+            other=[2.0, 2.0] * openmm.unit.second,
             foo=np.array([2.0, -2.0, 0.0]) * unit.nanometer,
             bar=[0, 90, 180],
             baz=np.array([3, 2, 1]).tobytes(),
@@ -123,15 +132,17 @@ class TestQuantityTypes:
             except ValueError:
                 assert all(getattr(m, key) == getattr(parsed, key))
 
+    @skip_if_missing("openmm.unit")
     def test_array_quantity_tuples(self):
         """Test that nested tuples are processed. This is relevant for how OpenMM stores
         periodic box vectors as a tuple of tuples."""
+        import openmm.unit
 
         class BoxModel(DefaultModel):
             box_vectors: ArrayQuantity["nanometer"]
 
-        as_tuple = ((4, 0, 0), (0, 4, 0), (0, 0, 4)) * openmm_unit.nanometer
-        as_array = np.eye(3) * 4 * openmm_unit.nanometer
+        as_tuple = ((4, 0, 0), (0, 4, 0), (0, 0, 4)) * openmm.unit.nanometer
+        as_array = np.eye(3) * 4 * openmm.unit.nanometer
 
         assert np.allclose(
             BoxModel(box_vectors=as_tuple).box_vectors,
@@ -169,7 +180,9 @@ class TestQuantityTypes:
         assert type(subject.doses.m) == np.ndarray
 
     @skip_if_missing("unyt")
+    @skip_if_missing("openmm.unit")
     def test_setters(self):
+        import openmm.unit
         import unyt
 
         class SimpleModel(DefaultModel):
@@ -180,8 +193,8 @@ class TestQuantityTypes:
 
         for new_data in [
             [3, 2, 1] * unit.second,
-            [3, 2, 1] * openmm_unit.second,
-            np.asarray([3, 2, 1]) * openmm_unit.second,
+            [3, 2, 1] * openmm.unit.second,
+            np.asarray([3, 2, 1]) * openmm.unit.second,
             [3, 2, 1] * unyt.second,
         ]:
             model.data = new_data
@@ -255,12 +268,25 @@ class TestQuantityTypes:
             m.lengths = 1 * unit.joule
 
 
+@skip_if_missing("openmm.unit")
+def test_is_openmm_quantity():
+    import openmm.unit
+
+    from openff.models.types import _is_openmm_quantity
+
+    assert _is_openmm_quantity(openmm.unit.Quantity(1, openmm.unit.nanometer))
+    assert not _is_openmm_quantity(unit.Quantity(1, unit.nanometer))
+
+
+@skip_if_missing("openmm.unit")
 def test_from_omm_quantity():
+    import openmm.unit
+
     from openff.models.types import _from_omm_quantity
 
-    from_list = _from_omm_quantity([1, 0] * openmm_unit.second)
-    from_array = _from_omm_quantity(np.asarray([1, 0]) * openmm_unit.second)
+    from_list = _from_omm_quantity([1, 0] * openmm.unit.second)
+    from_array = _from_omm_quantity(np.asarray([1, 0]) * openmm.unit.second)
     assert all(from_array == from_list)
 
     with pytest.raises(UnitValidationError):
-        _from_omm_quantity(True * openmm_unit.femtosecond)
+        _from_omm_quantity(True * openmm.unit.femtosecond)

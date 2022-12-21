@@ -14,16 +14,18 @@ defaults:
 
 jobs:
   test:
-    name: Test on ${{ matrix.os }}, Python ${{ matrix.python-version }}
+    name: Test on ${{ matrix.os }}, Python ${{ matrix.python-version }}, OpenMM ${{ matrix.openmm }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [macOS-latest, ubuntu-latest]
         python-version: ["3.8", "3.9", "3.10"]
+        openmm: [true, false]
         exclude:
           - python-version: "3.10"
             os: macOS-latest
+            openmm: true
 
     steps:
     - uses: actions/checkout@v3
@@ -35,10 +37,19 @@ jobs:
         df -h
         ulimit -a
 
-    - name: Install conda environment
+    - name: Install conda environment with OpenMM
+      if: ${{ matrix.openmm == true }}
       uses: mamba-org/provision-with-micromamba@main
       with:
         environment-file: devtools/conda-envs/test_env.yaml
+        extra-specs: |
+          python=${{ matrix.python-version }}
+
+    - name: Install conda environment without OpenMM
+      if: ${{ matrix.openmm == false }}
+      uses: mamba-org/provision-with-micromamba@main
+      with:
+        environment-file: devtools/conda-envs/no_openmm.yaml
         extra-specs: |
           python=${{ matrix.python-version }}
 
