@@ -20,6 +20,7 @@ class TestQuantityTypes:
             mass: FloatQuantity["atomic_mass_constant"]
             charge: FloatQuantity["elementary_charge"]
             foo: FloatQuantity
+            fuu: FloatQuantity
             bar: FloatQuantity["degree"]
             baz: FloatQuantity["nanometer"]
             qux: FloatQuantity["nanometer"]
@@ -33,6 +34,7 @@ class TestQuantityTypes:
             mass=4,
             charge=0 * unit.elementary_charge,
             foo=2.0 * unit.nanometer,
+            fuu=2.0 * openmm.unit.nanometer,
             bar="90.0 degree",
             baz=0.4 * openmm.unit.nanometer,
             qux=openmm.unit.Quantity(np.float64(0.4), openmm.unit.nanometer),
@@ -46,6 +48,7 @@ class TestQuantityTypes:
         assert a.mass == 4 * unit.atomic_mass_constant
         assert a.charge == 0 * unit.elementary_charge
         assert a.foo == 2.0 * unit.nanometer
+        assert a.fuu == 2.0 * unit.nanometer
         assert a.bar == 90 * unit.degree
         assert a.baz == 0.4 * unit.nanometer
         assert a.qux == 0.4 * unit.nanometer
@@ -60,6 +63,7 @@ class TestQuantityTypes:
             "mass": '{"val": 4, "unit": "atomic_mass_constant"}',
             "charge": '{"val": 0, "unit": "elementary_charge"}',
             "foo": '{"val": 2.0, "unit": "nanometer"}',
+            "fuu": '{"val": 2.0, "unit": "nanometer"}',
             "bar": '{"val": 90.0, "unit": "degree"}',
             "baz": '{"val": 0.4, "unit": "nanometer"}',
             "qux": '{"val": 0.4, "unit": "nanometer"}',
