@@ -106,4 +106,4 @@ ENV/
 *profraw
 
 # macOS
-.DS_store/
+.DS_store

@@ -1,3 +1,5 @@
+from typing import Any, Callable, Dict
+
 from openff.units import unit
 from pydantic import BaseModel
 
@@ -10,9 +12,9 @@ class DefaultModel(BaseModel):
     class Config:
         """Custom Pydantic configuration."""
 
-        json_encoders = {
+        json_encoders: Dict[Any, Callable] = {
             unit.Quantity: custom_quantity_encoder,
         }
-        json_loads = json_loader
-        validate_assignment = True
-        arbitrary_types_allowed = True
+        json_loads: Callable = json_loader
+        validate_assignment: bool = True
+        arbitrary_types_allowed: bool = True
