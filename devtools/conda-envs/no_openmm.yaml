@@ -1,4 +1,4 @@
-name: openff-models-test
+name: openff-models-no-openmm
 channels:
   - conda-forge
 dependencies:
