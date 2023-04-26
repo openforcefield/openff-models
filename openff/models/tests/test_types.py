@@ -61,7 +61,7 @@ class TestQuantityTypes:
         assert a.qux == 0.4 * unit.nanometer
         assert a.quix == 2.0 * unit.nanometer
         assert isinstance(a.quix.m, float)
-        assert a.quux == 1.0
+        assert a.quux == 1
         assert a.fnord == 4.2
         assert a.fum == "fum"
         assert a.zot == ["zot", 1, 4.2]
