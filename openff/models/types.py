@@ -71,7 +71,8 @@ else:
                 if isinstance(val, str):
                     # could do custom deserialization here?
                     val = unit.Quantity(val).to(unit_)
-                    return float(val.m) * val.u
+                    val._magnitude = float(val._magnitude)
+                    return val
                 raise UnitValidationError(
                     f"Could not validate data of type {type(val)}"
                 )
