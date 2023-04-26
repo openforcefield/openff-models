@@ -56,7 +56,7 @@ else:
                     # some custom behavior could go here
                     assert unit_.dimensionality == val.dimensionality
                     # return through converting to some intended default units (taken from the class)
-                    val = float(val.m) * val.u
+                    val._magnitude = float(val.m)
                     return val.to(unit_)
                     # could return here, without converting
                     # (could be inconsistent with data model - heteregenous but compatible units)
