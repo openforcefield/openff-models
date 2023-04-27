@@ -56,17 +56,23 @@ else:
                     # some custom behavior could go here
                     assert unit_.dimensionality == val.dimensionality
                     # return through converting to some intended default units (taken from the class)
+                    val._magnitude = float(val.m)
                     return val.to(unit_)
                     # could return here, without converting
                     # (could be inconsistent with data model - heteregenous but compatible units)
                     # return val
                 if _is_openmm_quantity(val):
                     return _from_omm_quantity(val).to(unit_)
-                if isinstance(val, (float, int)) and not isinstance(val, bool):
+                if isinstance(val, int) and not isinstance(val, bool):
+                    # coerce ints into floats for a FloatQuantity
+                    return float(val) * unit_
+                if isinstance(val, float):
                     return val * unit_
                 if isinstance(val, str):
                     # could do custom deserialization here?
-                    return unit.Quantity(val).to(unit_)
+                    val = unit.Quantity(val).to(unit_)
+                    val._magnitude = float(val._magnitude)
+                    return val
                 raise UnitValidationError(
                     f"Could not validate data of type {type(val)}"
                 )
@@ -91,7 +97,7 @@ def _from_omm_quantity(val: "openmm.unit.Quantity") -> unit.Quantity:
     val_ = val.value_in_unit(unit_)
     if type(val_) in {float, int}:
         unit_ = val.unit
-        return val_ * unit.Unit(str(unit_))
+        return float(val_) * unit.Unit(str(unit_))
     # Here is where the toolkit's ValidatedList could go, if present in the environment
     elif type(val_) in {tuple, list, np.ndarray}:
         array = np.asarray(val_)
