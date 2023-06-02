@@ -39,18 +39,18 @@ jobs:
 
     - name: Install conda environment with OpenMM
       if: ${{ matrix.openmm == true }}
-      uses: mamba-org/provision-with-micromamba@main
+      uses: mamba-org/setup-micromamba@v1
       with:
         environment-file: devtools/conda-envs/test_env.yaml
-        extra-specs: |
+        create-args: >-
           python=${{ matrix.python-version }}
 
     - name: Install conda environment without OpenMM
       if: ${{ matrix.openmm == false }}
-      uses: mamba-org/provision-with-micromamba@main
+      uses: mamba-org/setup-micromamba@v1
       with:
         environment-file: devtools/conda-envs/no_openmm.yaml
-        extra-specs: |
+        create-args: >-
           python=${{ matrix.python-version }}
 
     - name: Install package
