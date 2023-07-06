@@ -3,7 +3,7 @@ import json
 from typing import TYPE_CHECKING, Any, Dict
 
 import numpy as np
-from openff.units import unit
+from openff.units import unit, Quantity
 from openff.utilities import has_package, requires_package
 
 from openff.models.exceptions import (
@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 class _FloatQuantityMeta(type):
     def __getitem__(self, t):
         return type("FloatQuantity", (FloatQuantity,), {"__unit__": t})
+    def __instancecheck__(self, __instance: Any) -> bool:
+        return super().__instancecheck__(__instance) or isinstance(__instance, (Quantity, unit.Quantity)) or isinstance(__instance, (float, int))
 
 
 if TYPE_CHECKING:
@@ -163,6 +165,8 @@ def json_loader(data: str) -> dict:
 class _ArrayQuantityMeta(type):
     def __getitem__(self, t):
         return type("ArrayQuantity", (ArrayQuantity,), {"__unit__": t})
+    def __instancecheck__(self, __instance: Any) -> bool:
+        return super().__instancecheck__(__instance) or isinstance(__instance, (Quantity, unit.Quantity)) or isinstance(__instance, (list, np.ndarray))
 
 
 if TYPE_CHECKING:

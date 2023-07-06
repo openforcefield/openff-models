@@ -1,10 +1,11 @@
 name: openff-models-test
 channels:
+  - jaimergp/label/unsupported-cudatoolkit-shim
   - conda-forge
 dependencies:
   - python
   - pip
-  - pydantic <2.0.0a0
+  - pydantic =2
   - openff-units
   - openff-utilities
   - pytest
