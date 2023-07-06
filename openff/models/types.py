@@ -30,6 +30,8 @@ else:
     class FloatQuantity(float, metaclass=_FloatQuantityMeta):
         """A model for unit-bearing floats."""
 
+        # This needs to be completely reworked with
+        # https://docs.pydantic.dev/2.0/usage/types/custom/#classes-with-getpydanticcoreschema
         @classmethod
         def __get_validators__(cls):
             yield cls.validate_type
@@ -176,6 +178,8 @@ else:
     class ArrayQuantity(float, metaclass=_ArrayQuantityMeta):
         """A model for unit-bearing arrays."""
 
+        # This needs to be completely reworked with
+        # https://docs.pydantic.dev/2.0/usage/types/custom/#classes-with-getpydanticcoreschema
         @classmethod
         def __get_validators__(cls):
             yield cls.validate_type
