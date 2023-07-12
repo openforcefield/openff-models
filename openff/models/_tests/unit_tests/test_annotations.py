@@ -173,9 +173,70 @@ class TestImplicitUnitsArrayQuantity:
         # TODO: JSON roundtrip
 
 
-class TestExplicitUnitsArrayQuantity:
+class _ArrayModelsMixin:
+    @pytest.mark.parametrize(
+        "input",
+        [
+            Quantity("test", "second"),
+            Quantity(str),
+            Quantity(type(None), "femtojoule"),
+            Quantity(Quantity),
+        ],
+    )
+    def test_unsupported_wrapped_inputs(self, input):
+        with pytest.raises(
+            ValueError,
+            match=f"Input should be an instance.*{input.__class__.__name__}",
+        ):
+            self._MODEL(quantity=input)
+
+    @pytest.mark.parametrize(
+        "input",
+        [
+            Quantity([2], "picosecond"),
+            Quantity([3], "kilojoule_per_mole"),
+        ],
+    )
+    def test_incompatible_units(self, input):
+        with pytest.raises(
+            ValueError,
+            match=f"Cannot convert.*{str(input.units)} to {self._UNIT}",
+        ):
+            self._MODEL(quantity=input)
+
+
+class TestImplicitUnits(_ArrayModelsMixin):
+    _MODEL = ImplicitUnitsArrayModel
+    _TYPE = numpy.ndarray
+    _UNIT = "dimensionless"
+
+    @pytest.mark.parametrize(
+        "input",
+        [
+            [0.0],
+            [2.0, 1.0],
+            numpy.array([0.0]),
+            numpy.array([2.0, 1.0]),
+            Quantity([0.0]),
+            Quantity([2.0, 1.0]),
+            Quantity(numpy.array([0.0])),
+            Quantity(numpy.array([2.0, 1.0])),
+        ],
+    )
+    def test_supported_inputs(self, input):
+        model = self._MODEL(quantity=input)
+
+        assert isinstance(model, self._MODEL)
+        assert isinstance(model.quantity, Quantity)
+        assert isinstance(model.quantity.m, self._TYPE)
+
+        # TODO: JSON roundtrip
+
+
+class TestExplicitUnitsArrayQuantity(_ArrayModelsMixin):
     _MODEL = ExplicitUnitsArrayModel
     _TYPE = numpy.ndarray
+    _UNIT = "nanometer"
 
     @pytest.mark.parametrize(
         "input",

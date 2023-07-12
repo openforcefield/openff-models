@@ -254,7 +254,9 @@ class _ArrayQuantityPydanticAnnotation(float, metaclass=_ArrayQuantityMeta):
 
         def validate_from_quantity(value: Quantity) -> Quantity:
             if not isinstance(value.m, (list, numpy.ndarray)):
-                raise ValueError
+                raise ValueError(
+                    f"Wrapped object must be a list or numpy.ndarray, not {type(value.m)}.",
+                )
 
             annotated_units = Unit(
                 getattr(cls, "__unit__", "dimensionless"),
