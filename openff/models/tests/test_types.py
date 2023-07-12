@@ -219,7 +219,9 @@ class TestQuantityTypes:
             name: str
 
         m = MixedModel(
-            scalar_data=1.0 * unit.meter, array_data=[-1, 0] * unit.second, name="foo"
+            scalar_data=1.0 * unit.meter,
+            array_data=[-1, 0] * unit.second,
+            name="foo",
         )
 
         assert json.loads(m.json()) == {

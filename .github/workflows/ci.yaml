@@ -68,7 +68,7 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest -v --cov=openff/models --cov-report=xml --color=yes openff/models/tests/
+        pytest -v --cov=openff/models --cov-report=xml --color=yes openff/models/_tests/
 
     - name: CodeCov
       uses: codecov/codecov-action@v3
