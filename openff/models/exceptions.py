@@ -10,6 +10,12 @@ class UnitValidationError(ValueError):
     """
 
 
+class IncompatibleUnitError(UnitValidationError):
+    """
+    Exception for attempting to convert between incompatible units.
+    """
+
+
 class UnsupportedExportError(BaseException):
     """
     Exception for attempting to write to an unsupported file format.
