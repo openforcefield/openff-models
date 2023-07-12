@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from openff.models.annotations import FloatQuantity, IntQuantity
 
 
-class ImplicitUnitIntModel(BaseModel):
+class ImplicitUnitsIntModel(BaseModel):
     int_quantity: IntQuantity
 
 
@@ -14,6 +14,8 @@ class ImplicitUnitsFloatModel(BaseModel):
 
 
 class TestImplicitUnitsIntQuantity:
+    _MODEL = ImplicitUnitsIntModel
+
     @pytest.mark.parametrize(
         "input",
         [
@@ -29,13 +31,13 @@ class TestImplicitUnitsIntQuantity:
         ],
     )
     def test_supported_inputs(self, input):
-        model = ImplicitUnitIntModel(int_quantity=input)
+        model = self._MODEL(int_quantity=input)
 
-        assert isinstance(model, ImplicitUnitIntModel)
+        assert isinstance(model, self._MODEL)
         assert isinstance(model.int_quantity, Quantity)
         assert isinstance(model.int_quantity.m, int)
 
-        assert ImplicitUnitIntModel.model_validate_json(
+        assert self._MODEL.model_validate_json(
             model.model_dump_json(),
         ).int_quantity == unit.Quantity(int(input))
 
@@ -52,10 +54,26 @@ class TestImplicitUnitsIntQuantity:
             ValueError,
             match=f"Input should be an instance.*{input.__class__.__name__}",
         ):
-            ImplicitUnitIntModel(int_quantity=input)
+            self._MODEL(int_quantity=input)
+
+    @pytest.mark.parametrize(
+        "input",
+        [
+            unit.Quantity(4, "picosecond"),
+            unit.Quantity(2, "kilojoule_per_mole"),
+        ],
+    )
+    def test_incompatible_units(self, input):
+        with pytest.raises(
+            ValueError,
+            match=f"Cannot convert.*{str(input.units)} to dimensionless",
+        ):
+            self._MODEL(int_quantity=input)
 
 
 class TestImplicitUnitsFloatQuantity:
+    _MODEL = ImplicitUnitsFloatModel
+
     @pytest.mark.parametrize(
         "input",
         [
@@ -71,13 +89,13 @@ class TestImplicitUnitsFloatQuantity:
         ],
     )
     def test_supported_inputs(self, input):
-        model = ImplicitUnitsFloatModel(float_quantity=input)
+        model = self._MODEL(float_quantity=input)
 
-        assert isinstance(model, ImplicitUnitsFloatModel)
+        assert isinstance(model, self._MODEL)
         assert isinstance(model.float_quantity, Quantity)
         assert isinstance(model.float_quantity.m, float)
 
-        assert ImplicitUnitsFloatModel.model_validate_json(
+        assert self._MODEL.model_validate_json(
             model.model_dump_json(),
         ).float_quantity == unit.Quantity(float(input))
 
@@ -94,18 +112,20 @@ class TestImplicitUnitsFloatQuantity:
             ValueError,
             match=f"Input should be an instance.*{input.__class__.__name__}",
         ):
-            ImplicitUnitsFloatModel(float_quantity=input)
+            self._MODEL(float_quantity=input)
 
 
-class ExplicitUnitIntModel(BaseModel):
-    int_quantity: IntQuantity["nanometer"]
+class ExplicitUnitsIntModel(BaseModel):
+    int_quantity: IntQuantity["nanometer"]  # type: ignore
 
 
 class ExplicitUnitsFloatModel(BaseModel):
-    float_quantity: FloatQuantity["nanometer"]
+    float_quantity: FloatQuantity["nanometer"]  # type: ignore
 
 
 class TestExplicitUnitsIntQuantity:
+    _MODEL = ExplicitUnitsIntModel
+
     @pytest.mark.parametrize(
         "input",
         [
@@ -121,9 +141,9 @@ class TestExplicitUnitsIntQuantity:
         ],
     )
     def test_supported_inputs(self, input):
-        model = ExplicitUnitIntModel(int_quantity=input)
+        model = self._MODEL(int_quantity=input)
 
-        assert isinstance(model, ExplicitUnitIntModel)
+        assert isinstance(model, self._MODEL)
         assert isinstance(model.int_quantity, Quantity)
         assert isinstance(model.int_quantity.m, int)
 
@@ -142,10 +162,30 @@ class TestExplicitUnitsIntQuantity:
             ValueError,
             match=f"Input should be an instance.*{input.__class__.__name__}",
         ):
-            ExplicitUnitIntModel(int_quantity=input)
+            self._MODEL(int_quantity=input)
+
+    @pytest.mark.parametrize(
+        "input",
+        [
+            unit.Quantity(4, "picosecond"),
+            unit.Quantity(2, "kilojoule_per_mole"),
+        ],
+    )
+    def test_incompatible_units(self, input):
+        with pytest.raises(
+            ValueError,
+            match=f"Cannot convert.*{str(input.units)} to nanometer",
+        ):
+            self._MODEL(int_quantity=input)
+
+    def test_compatible_units(self):
+        model = self._MODEL(int_quantity=Quantity(200, "angstrom"))
+        assert model.int_quantity == Quantity(20, "nanometer")
 
 
 class TestExplicitUnitsFloatQuantity:
+    _MODEL = ExplicitUnitsFloatModel
+
     @pytest.mark.parametrize(
         "input",
         [
@@ -161,9 +201,9 @@ class TestExplicitUnitsFloatQuantity:
         ],
     )
     def test_supported_inputs(self, input):
-        model = ExplicitUnitsFloatModel(float_quantity=input)
+        model = self._MODEL(float_quantity=input)
 
-        assert isinstance(model, ExplicitUnitsFloatModel)
+        assert isinstance(model, self._MODEL)
         assert isinstance(model.float_quantity, Quantity)
         assert isinstance(model.float_quantity.m, float)
 
@@ -182,4 +222,22 @@ class TestExplicitUnitsFloatQuantity:
             ValueError,
             match=f"Input should be an instance.*{input.__class__.__name__}",
         ):
-            ExplicitUnitsFloatModel(float_quantity=input)
+            self._MODEL(float_quantity=input)
+
+    @pytest.mark.parametrize(
+        "input",
+        [
+            unit.Quantity(4, "picosecond"),
+            unit.Quantity(2, "kilojoule_per_mole"),
+        ],
+    )
+    def test_incompatible_units(self, input):
+        with pytest.raises(
+            ValueError,
+            match=f"Cannot convert.*{str(input.units)} to nanometer",
+        ):
+            self._MODEL(float_quantity=input)
+
+    def test_compatible_units(self):
+        model = self._MODEL(float_quantity=Quantity(200, "angstrom"))
+        assert model.float_quantity == Quantity(20.0, "nanometer")
