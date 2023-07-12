@@ -1,8 +1,9 @@
+import numpy
 import pytest
 from openff.units import Quantity, Unit
 from pydantic import BaseModel
 
-from openff.models.annotations import FloatQuantity, IntQuantity
+from openff.models.annotations import ArrayQuantity, FloatQuantity, IntQuantity
 
 
 class ImplicitUnitsIntModel(BaseModel):
@@ -11,6 +12,22 @@ class ImplicitUnitsIntModel(BaseModel):
 
 class ImplicitUnitsFloatModel(BaseModel):
     quantity: FloatQuantity
+
+
+class ImplicitUnitsArrayModel(BaseModel):
+    quantity: ArrayQuantity
+
+
+class ExplicitUnitsIntModel(BaseModel):
+    quantity: IntQuantity["nanometer"]  # type: ignore
+
+
+class ExplicitUnitsFloatModel(BaseModel):
+    quantity: FloatQuantity["nanometer"]  # type: ignore
+
+
+class ExplicitUnitsArrayModel(BaseModel):
+    quantity: ArrayQuantity["nanometer"]  # type: ignore
 
 
 class _BaseMixin:
@@ -87,14 +104,6 @@ class TestImplicitUnitsFloatQuantity(_ImplicitModelsMixin):
     _TYPE = float
 
 
-class ExplicitUnitsIntModel(BaseModel):
-    quantity: IntQuantity["nanometer"]  # type: ignore
-
-
-class ExplicitUnitsFloatModel(BaseModel):
-    quantity: FloatQuantity["nanometer"]  # type: ignore
-
-
 class _ExplicitModelsMixin(_BaseMixin):
     _UNIT = "nanometer"
 
@@ -135,3 +144,61 @@ class TestExplicitUnitsIntQuantity(_ExplicitModelsMixin):
 class TestExplicitUnitsFloatQuantity(_ExplicitModelsMixin):
     _MODEL = ExplicitUnitsFloatModel
     _TYPE = float
+
+
+class TestImplicitUnitsArrayQuantity:
+    _MODEL = ImplicitUnitsArrayModel
+    _TYPE = numpy.ndarray
+
+    @pytest.mark.parametrize(
+        "input",
+        [
+            [0.0],
+            [2.0, 1.0],
+            numpy.array([0.0]),
+            numpy.array([2.0, 1.0]),
+            Quantity([0.0]),
+            Quantity([2.0, 1.0]),
+            Quantity(numpy.array([0.0])),
+            Quantity(numpy.array([2.0, 1.0])),
+        ],
+    )
+    def test_supported_inputs(self, input):
+        model = self._MODEL(quantity=input)
+
+        assert isinstance(model, self._MODEL)
+        assert isinstance(model.quantity, Quantity)
+        assert isinstance(model.quantity.m, self._TYPE)
+
+        # TODO: JSON roundtrip
+
+
+class TestExplicitUnitsArrayQuantity:
+    _MODEL = ExplicitUnitsArrayModel
+    _TYPE = numpy.ndarray
+
+    @pytest.mark.parametrize(
+        "input",
+        [
+            [0.0],
+            [2.0, 1.0],
+            numpy.array([0.0]),
+            numpy.array([2.0, 1.0]),
+            Quantity([0.0], "nanometer"),
+            Quantity([2.0, 1.0], "nanometer"),
+            Quantity(numpy.array([0.0]), "nanometer"),
+            Quantity(numpy.array([2.0, 1.0]), "nanometer"),
+        ],
+    )
+    def test_supported_inputs(self, input):
+        model = self._MODEL(quantity=input)
+
+        assert isinstance(model, self._MODEL)
+        assert isinstance(model.quantity, Quantity)
+        assert isinstance(model.quantity.m, self._TYPE)
+
+        # TODO: JSON roundtrip
+
+    def test_compatible_units(self):
+        model = self._MODEL(quantity=Quantity([200.0, 100.0], "angstrom"))
+        numpy.testing.assert_equal(model.quantity.m, [20.0, 10.0])

@@ -1,5 +1,6 @@
 from typing import Any, Callable
 
+import numpy
 from openff.units import Quantity, Unit
 from pydantic import GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
@@ -13,6 +14,24 @@ class _IntQuantityMeta(type):
         return type(
             "_IntQuantityPydanticAnnotation",
             (_IntQuantityPydanticAnnotation,),
+            {"__unit__": t},
+        )
+
+
+class _FloatQuantityMeta(type):
+    def __getitem__(self, t):
+        return type(
+            "_FloatQuantityPydanticAnnotation",
+            (_FloatQuantityPydanticAnnotation,),
+            {"__unit__": t},
+        )
+
+
+class _ArrayQuantityMeta(type):
+    def __getitem__(self, t):
+        return type(
+            "_ArrayQuantityPydanticAnnotation",
+            (_ArrayQuantityPydanticAnnotation,),
             {"__unit__": t},
         )
 
@@ -111,15 +130,6 @@ class _IntQuantityPydanticAnnotation(int, metaclass=_IntQuantityMeta):
         handler: GetJsonSchemaHandler,
     ) -> JsonSchemaValue:
         return handler(core_schema.int_schema())
-
-
-class _FloatQuantityMeta(type):
-    def __getitem__(self, t):
-        return type(
-            "_FloatQuantityPydanticAnnotation",
-            (_FloatQuantityPydanticAnnotation,),
-            {"__unit__": t},
-        )
 
 
 class _FloatQuantityPydanticAnnotation(float, metaclass=_FloatQuantityMeta):
@@ -221,9 +231,98 @@ class _FloatQuantityPydanticAnnotation(float, metaclass=_FloatQuantityMeta):
         return handler(core_schema.float_schema())
 
 
+class _ArrayQuantityPydanticAnnotation(float, metaclass=_ArrayQuantityMeta):
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls,
+        _source_type: Any,
+        _handler: Callable[[Any], core_schema.CoreSchema],
+    ) -> core_schema.CoreSchema:
+        """
+        Return a pydantic_core.CoreSchema
+
+        """
+
+        def validate_from_list(value: list) -> Quantity:
+            return Quantity(
+                numpy.array(value),
+                units=getattr(cls, "__unit__", "dimensionless"),
+            )
+
+        def validate_from_array(value: numpy.ndarray) -> Quantity:
+            return Quantity(value, units=getattr(cls, "__unit__", "dimensionless"))
+
+        def validate_from_quantity(value: Quantity) -> Quantity:
+            if not isinstance(value.m, (list, numpy.ndarray)):
+                raise ValueError
+
+            annotated_units = Unit(
+                getattr(cls, "__unit__", "dimensionless"),
+            )
+
+            if value.units == annotated_units:
+                return value
+
+            elif value.units.is_compatible_with(annotated_units):
+                return Quantity(
+                    numpy.array(value.to(annotated_units).m),
+                    units=annotated_units,
+                )
+
+            else:
+                raise IncompatibleUnitError(
+                    f"Cannot convert `Quantity` with units {value.units} to {annotated_units}.",
+                )
+
+        from_list_schema = core_schema.chain_schema(
+            [
+                core_schema.is_instance_schema(list),
+                core_schema.no_info_plain_validator_function(validate_from_list),
+            ],
+        )
+        from_array_schema = core_schema.chain_schema(
+            [
+                core_schema.is_instance_schema(numpy.ndarray),
+                core_schema.no_info_plain_validator_function(validate_from_array),
+            ],
+        )
+
+        from_quantity_schema = core_schema.chain_schema(
+            [
+                core_schema.is_instance_schema(Quantity),
+                core_schema.no_info_plain_validator_function(validate_from_quantity),
+            ],
+        )
+
+        return core_schema.json_or_python_schema(
+            json_schema=core_schema.chain_schema(
+                [
+                    core_schema.float_schema(),
+                    core_schema.no_info_plain_validator_function(validate_from_list),
+                ],
+            ),
+            python_schema=core_schema.union_schema(
+                [
+                    from_quantity_schema,
+                    from_array_schema,
+                    from_list_schema,
+                ],
+            ),
+            serialization=core_schema.plain_serializer_function_ser_schema(
+                lambda instance: float(instance.m),
+            ),
+        )
+
+    @classmethod
+    def __get_pydantic_json_schema__(
+        cls,
+        _core_schema: core_schema.CoreSchema,
+        handler: GetJsonSchemaHandler,
+    ) -> JsonSchemaValue:
+        return handler(core_schema.float_schema())
+
+
 # Each of these `Annotated` wrappers will be used as annotations for fields;
-# these communicate what types are implied to be allowed
-# IntQuantity = Annotated[int, Quantity, _IntQuantityPydanticAnnotation]
-# FloatQuantity = Annotated[float, Quantity, _FloatQuantityPydanticAnnotation]
 IntQuantity = _IntQuantityPydanticAnnotation
 FloatQuantity = _FloatQuantityPydanticAnnotation
+ArrayQuantity = _ArrayQuantityPydanticAnnotation
