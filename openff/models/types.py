@@ -3,7 +3,7 @@ import json
 from typing import TYPE_CHECKING, Any, Dict
 
 import numpy as np
-from openff.units import unit
+from openff.units import Quantity, unit
 from openff.utilities import has_package, requires_package
 
 from openff.models.exceptions import (
@@ -20,6 +20,14 @@ class _FloatQuantityMeta(type):
     def __getitem__(self, t):
         return type("FloatQuantity", (FloatQuantity,), {"__unit__": t})
 
+    def __instancecheck__(self, __instance: Any) -> bool:
+        return (
+            super().__instancecheck__(__instance)
+            or isinstance(__instance, (Quantity, unit.Quantity))
+            or isinstance(__instance, (float, int))
+            and not isinstance(__instance, bool)
+        )
+
 
 if TYPE_CHECKING:
     FloatQuantity = unit.Quantity  # np.ndarray
@@ -28,6 +36,8 @@ else:
     class FloatQuantity(float, metaclass=_FloatQuantityMeta):
         """A model for unit-bearing floats."""
 
+        # This needs to be completely reworked with
+        # https://docs.pydantic.dev/2.0/usage/types/custom/#classes-with-getpydanticcoreschema
         @classmethod
         def __get_validators__(cls):
             yield cls.validate_type
@@ -40,7 +50,7 @@ else:
                 if isinstance(val, (float, int)):
                     # TODO: Can this exception be raised with knowledge of the field it's in?
                     raise MissingUnitError(
-                        f"Value {val} needs to be tagged with a unit"
+                        f"Value {val} needs to be tagged with a unit",
                     )
                 elif isinstance(val, unit.Quantity):
                     return unit.Quantity(val)
@@ -48,7 +58,7 @@ else:
                     return _from_omm_quantity(val)
                 else:
                     raise UnitValidationError(
-                        f"Could not validate data of type {type(val)}"
+                        f"Could not validate data of type {type(val)}",
                     )
             else:
                 unit_ = unit(unit_)
@@ -74,7 +84,7 @@ else:
                     val._magnitude = float(val._magnitude)
                     return val
                 raise UnitValidationError(
-                    f"Could not validate data of type {type(val)}"
+                    f"Could not validate data of type {type(val)}",
                 )
 
 
@@ -107,7 +117,7 @@ def _from_omm_quantity(val: "openmm.unit.Quantity") -> unit.Quantity:
     else:
         raise UnitValidationError(
             "Found a openmm.unit.Unit wrapped around something other than a float-like "
-            f"or np.ndarray-like. Found a unit wrapped around type {type(val_)}."
+            f"or np.ndarray-like. Found a unit wrapped around type {type(val_)}.",
         )
 
 
@@ -128,7 +138,7 @@ class QuantityEncoder(json.JSONEncoder):
                 # This shouldn't ever be hit if our object models
                 # behave in ways we expect?
                 raise UnsupportedExportError(
-                    f"trying to serialize unsupported type {type(obj.magnitude)}"
+                    f"trying to serialize unsupported type {type(obj.magnitude)}",
                 )
             return {
                 "val": data,
@@ -164,6 +174,13 @@ class _ArrayQuantityMeta(type):
     def __getitem__(self, t):
         return type("ArrayQuantity", (ArrayQuantity,), {"__unit__": t})
 
+    def __instancecheck__(self, __instance: Any) -> bool:
+        return (
+            super().__instancecheck__(__instance)
+            or isinstance(__instance, (Quantity, unit.Quantity))
+            or isinstance(__instance, (list, np.ndarray))
+        )
+
 
 if TYPE_CHECKING:
     ArrayQuantity = unit.Quantity  # np.ndarray
@@ -172,6 +189,8 @@ else:
     class ArrayQuantity(float, metaclass=_ArrayQuantityMeta):
         """A model for unit-bearing arrays."""
 
+        # This needs to be completely reworked with
+        # https://docs.pydantic.dev/2.0/usage/types/custom/#classes-with-getpydanticcoreschema
         @classmethod
         def __get_validators__(cls):
             yield cls.validate_type
@@ -184,7 +203,7 @@ else:
                 if isinstance(val, (list, np.ndarray)):
                     # TODO: Can this exception be raised with knowledge of the field it's in?
                     raise MissingUnitError(
-                        f"Value {val} needs to be tagged with a unit"
+                        f"Value {val} needs to be tagged with a unit",
                     )
                 elif isinstance(val, unit.Quantity):
                     # TODO: This might be a redundant cast causing wasted CPU time.
@@ -194,7 +213,7 @@ else:
                     return _from_omm_quantity(val)
                 else:
                     raise UnitValidationError(
-                        f"Could not validate data of type {type(val)}"
+                        f"Could not validate data of type {type(val)}",
                     )
             else:
                 unit_ = unit(unit_)
@@ -214,5 +233,5 @@ else:
                     raise NotImplementedError
                     #  return unit.Quantity(val).to(unit_)
                 raise UnitValidationError(
-                    f"Could not validate data of type {type(val)}"
+                    f"Could not validate data of type {type(val)}",
                 )

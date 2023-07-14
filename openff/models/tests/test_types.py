@@ -97,7 +97,7 @@ class TestQuantityTypes:
 
         with pytest.raises(
             ValidationError,
-            match=r"Could not validate data of type .*[bool|list].*",
+            match=r"1 validation error for Model((.|\n)*)(bool|list)",
         ):
             Model(a=val)
 
@@ -166,7 +166,8 @@ class TestQuantityTypes:
             a: ArrayQuantity["atomic_mass_constant"]
 
         with pytest.raises(
-            ValidationError, match=r"Could not validate data of type .*[bool|int].*"
+            ValidationError,
+            match=r"1 validation error for Model((.|\n)*)(bool|int)",
         ):
             Model(a=val)
 
@@ -218,7 +219,9 @@ class TestQuantityTypes:
             name: str
 
         m = MixedModel(
-            scalar_data=1.0 * unit.meter, array_data=[-1, 0] * unit.second, name="foo"
+            scalar_data=1.0 * unit.meter,
+            array_data=[-1, 0] * unit.second,
+            name="foo",
         )
 
         assert json.loads(m.json()) == {
