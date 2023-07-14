@@ -119,7 +119,10 @@ class _IntQuantityPydanticAnnotation(int, metaclass=_IntQuantityMeta):
                 ],
             ),
             serialization=core_schema.plain_serializer_function_ser_schema(
-                lambda quantity: {"value": int(quantity.m), "unit": str(quantity.units)},
+                lambda quantity: {
+                    "value": int(quantity.m),
+                    "unit": str(quantity.units),
+                },
             ),
         )
 
@@ -218,7 +221,10 @@ class _FloatQuantityPydanticAnnotation(float, metaclass=_FloatQuantityMeta):
                 ],
             ),
             serialization=core_schema.plain_serializer_function_ser_schema(
-                lambda quantity: {"value": float(quantity.m), "unit": str(quantity.units)},
+                lambda quantity: {
+                    "value": float(quantity.m),
+                    "unit": str(quantity.units),
+                },
             ),
         )
 
@@ -311,7 +317,10 @@ class _ArrayQuantityPydanticAnnotation(float, metaclass=_ArrayQuantityMeta):
                 ],
             ),
             serialization=core_schema.plain_serializer_function_ser_schema(
-                lambda quantity: {"value": quantity.m.tolist(), "unit": str(quantity.units)},
+                lambda quantity: {
+                    "value": quantity.m.tolist(),
+                    "unit": str(quantity.units),
+                },
             ),
         )
 
