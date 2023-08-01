@@ -4,11 +4,15 @@ import numpy as np
 import pytest
 from openff.units import unit
 from openff.utilities.testing import skip_if_missing
-from pydantic import ValidationError
 
 from openff.models.exceptions import UnitValidationError
 from openff.models.models import DefaultModel
 from openff.models.types import ArrayQuantity, FloatQuantity
+
+try:
+    from pydantic.v1 import ValidationError
+except ImportError:
+    from pydantic import ValidationError
 
 
 class TestQuantityTypes:
@@ -186,9 +190,9 @@ class TestQuantityTypes:
         )
 
         # Ensure unyt scalars (unyt.unyt_quantity) are stored as floats
-        assert type(subject.age.m) == float
-        assert type(subject.height.m) == float
-        assert type(subject.doses.m) == np.ndarray
+        assert subject.age.m is float
+        assert subject.height.m is float
+        assert subject.doses.m is np.ndarray
 
     @skip_if_missing("unyt")
     @skip_if_missing("openmm.unit")
