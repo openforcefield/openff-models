@@ -1,7 +1,12 @@
 from typing import Any, Callable, Dict
 
 from openff.units import unit
-from pydantic import BaseModel
+
+try:
+    from pydantic.v1 import BaseModel
+except ImportError:
+    from pydantic import BaseModel
+
 
 from openff.models.types import custom_quantity_encoder, json_loader
 

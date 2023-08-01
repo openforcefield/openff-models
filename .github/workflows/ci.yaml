@@ -14,14 +14,16 @@ defaults:
 
 jobs:
   test:
-    name: Test on ${{ matrix.os }}, Python ${{ matrix.python-version }}, OpenMM ${{ matrix.openmm }}
+    name: Test on ${{ matrix.os }}, Python ${{ matrix.python-version }}, OpenMM ${{ matrix.openmm }}, Pydantic ${{ matrix.pydantic-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [macOS-latest, ubuntu-latest]
         python-version: ["3.8", "3.9", "3.10"]
+        pydantic-version: ["1", "2"]
         openmm: [true, false]
+        run-mypy: [false]
         exclude:
           - python-version: "3.10"
             os: macOS-latest
@@ -44,6 +46,7 @@ jobs:
         environment-file: devtools/conda-envs/test_env.yaml
         create-args: >-
           python=${{ matrix.python-version }}
+          pydantic=${{ matrix.pydantic-version }}
 
     - name: Install conda environment without OpenMM
       if: ${{ matrix.openmm == false }}
@@ -63,6 +66,7 @@ jobs:
         conda list
 
     - name: Run mypy
+      if: ${{ matrix.run-mypy == true }}
       run: |
         mypy -p "openff.models"
 
