@@ -190,9 +190,9 @@ class TestQuantityTypes:
         )
 
         # Ensure unyt scalars (unyt.unyt_quantity) are stored as floats
-        assert type(subject.age.m) == float
-        assert type(subject.height.m) == float
-        assert type(subject.doses.m) == np.ndarray
+        assert subject.age.m is float
+        assert subject.height.m is float
+        assert subject.doses.m is np.ndarray
 
     @skip_if_missing("unyt")
     @skip_if_missing("openmm.unit")
