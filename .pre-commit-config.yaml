@@ -9,7 +9,7 @@ repos:
   - id: trailing-whitespace
   - id: debug-statements
 - repo: https://github.com/psf/black
-  rev: 23.7.0
+  rev: 23.9.1
   hooks:
   - id: black
     files: ^openff
@@ -30,7 +30,7 @@ repos:
         'flake8-no-pep420',
     ]
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.10.1
+  rev: v3.14.0
   hooks:
   - id: pyupgrade
     files: ^openff
