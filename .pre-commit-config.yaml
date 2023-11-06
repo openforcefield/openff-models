@@ -2,14 +2,14 @@ ci:
   autoupdate_schedule: "monthly"
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v4.5.0
   hooks:
   - id: check-yaml
   - id: end-of-file-fixer
   - id: trailing-whitespace
   - id: debug-statements
 - repo: https://github.com/psf/black
-  rev: 23.9.1
+  rev: 23.10.1
   hooks:
   - id: black
     files: ^openff
@@ -30,7 +30,7 @@ repos:
         'flake8-no-pep420',
     ]
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.14.0
+  rev: v3.15.0
   hooks:
   - id: pyupgrade
     files: ^openff
