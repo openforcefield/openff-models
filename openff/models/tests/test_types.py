@@ -2,7 +2,7 @@ import json
 
 import numpy as np
 import pytest
-from openff.units import unit
+from openff.units import Quantity, unit
 from openff.utilities.testing import skip_if_missing
 
 from openff.models.exceptions import UnitValidationError
@@ -306,6 +306,7 @@ def test_from_omm_quantity():
     with pytest.raises(UnitValidationError):
         _from_omm_quantity(True * openmm.unit.femtosecond)
 
+
 @skip_if_missing("openmm.unit")
 def test_from_omm_box_vectors():
     """Reproduce issue #35."""
@@ -322,7 +323,10 @@ def test_from_omm_box_vectors():
 
     validated = ArrayQuantity.validate_type(box_vectors)
 
+    assert isinstance(validated, Quantity)
+
     assert validated.shape == (3, 3)
+    assert validated.m.shape == (3, 3)
     assert validated.units == unit.nanometer
 
     for index, value in enumerate([4, 2, 5]):
