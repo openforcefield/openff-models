@@ -305,3 +305,25 @@ def test_from_omm_quantity():
 
     with pytest.raises(UnitValidationError):
         _from_omm_quantity(True * openmm.unit.femtosecond)
+
+@skip_if_missing("openmm.unit")
+def test_from_omm_box_vectors():
+    """Reproduce issue #35."""
+    import openmm
+    import openmm.unit
+
+    # mimic the output of getDefaultPeriodicBoxVectors, which returns
+    # list[openmm.unit.Quantity[openmm.unit.Vec3]]
+    box_vectors = [
+        openmm.unit.Quantity(openmm.Vec3(x=4, y=0, z=0), openmm.unit.nanometer),
+        openmm.unit.Quantity(openmm.Vec3(x=0, y=2, z=0), openmm.unit.nanometer),
+        openmm.unit.Quantity(openmm.Vec3(x=0, y=0, z=5), openmm.unit.nanometer),
+    ]
+
+    validated = ArrayQuantity.validate_type(box_vectors)
+
+    assert validated.shape == (3, 3)
+    assert validated.units == unit.nanometer
+
+    for index, value in enumerate([4, 2, 5]):
+        assert validated.m[index][index] == value
