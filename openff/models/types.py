@@ -3,7 +3,7 @@ import json
 from typing import TYPE_CHECKING, Any, Dict
 
 import numpy as np
-from openff.units import unit
+from openff.units import Quantity, unit
 from openff.utilities import has_package, requires_package
 
 from openff.models.exceptions import (
@@ -99,7 +99,9 @@ def _from_omm_quantity(val: "openmm.unit.Quantity") -> unit.Quantity:
         unit_ = val.unit
         return float(val_) * unit.Unit(str(unit_))
     # Here is where the toolkit's ValidatedList could go, if present in the environment
-    elif type(val_) in {tuple, list, np.ndarray}:
+    elif (type(val_) in {tuple, list, np.ndarray}) or (
+        type(val_).__module__ == "openmm.vec3"
+    ):
         array = np.asarray(val_)
         return array * unit.Unit(str(unit_))
     elif isinstance(val_, (float, int)) and type(val_).__module__ == "numpy":
@@ -182,10 +184,21 @@ else:
             unit_ = getattr(cls, "__unit__", Any)
             if unit_ is Any:
                 if isinstance(val, (list, np.ndarray)):
+                    # Work around a special case in which val might be list[openmm.unit.Quantity]
+                    if {type(element).__module__ for element in val} == {
+                        "openmm.unit.quantity"
+                    }:
+                        unit_ = _from_omm_quantity(val[-1]).units
+                        return Quantity(
+                            [_from_omm_quantity(element) for element in val],
+                            units=unit_,
+                        )
+
                     # TODO: Can this exception be raised with knowledge of the field it's in?
                     raise MissingUnitError(
                         f"Value {val} needs to be tagged with a unit"
                     )
+
                 elif isinstance(val, unit.Quantity):
                     # TODO: This might be a redundant cast causing wasted CPU time.
                     #       But maybe it handles pint vs openff.units.unit?
