@@ -1,4 +1,5 @@
 """Custom models for dealing with unit-bearing quantities in a Pydantic-compatible manner."""
+
 import json
 from typing import TYPE_CHECKING, Any, Dict
 
