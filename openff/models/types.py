@@ -218,7 +218,17 @@ else:
                 if _is_openmm_quantity(val):
                     return _from_omm_quantity(val).to(unit_)
                 if isinstance(val, (np.ndarray, list)):
-                    return val * unit_
+                    if "unyt" in str(val.__class__):
+                        val = val.to_ndarray()
+                    try:
+                        return val * unit_
+                    except RuntimeError as error:
+                        # unyt subclasses ndarray but doesn't __mult__ with
+                        # pint.Unit objects
+                        if val.__class__.__module__.startswith("unyt"):
+                            return val.to_ndarray() * unit_
+                        else:
+                            raise error
                 if isinstance(val, bytes):
                     # Define outside loop
                     dt = np.dtype(int).newbyteorder("<")

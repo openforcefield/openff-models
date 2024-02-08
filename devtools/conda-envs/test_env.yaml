@@ -13,5 +13,6 @@ dependencies:
   - pytest-randomly
   - openmm
   - mypy >=0.991
+  - unyt =3
   - pip:
     - types-setuptools

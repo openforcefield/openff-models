@@ -11,6 +11,7 @@ dependencies:
   - pytest-cov
   - pytest-xdist
   - pytest-randomly
+  - unyt =3
   - mypy
   - pip:
     - types-setuptools
