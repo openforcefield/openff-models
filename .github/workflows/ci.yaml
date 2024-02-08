@@ -23,16 +23,11 @@ jobs:
         python-version: ["3.9", "3.9", "3.11", "3.12"]
         pydantic-version: ["1", "2"]
         openmm: [true, false]
-        run-mypy: [false]
-        exclude:
-          - python-version: "3.12"
-            openmm: true
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install conda environment with OpenMM
-      if: ${{ matrix.openmm == true }}
+    - name: Install conda environment without OpenMM
       uses: mamba-org/setup-micromamba@v1
       with:
         environment-file: devtools/conda-envs/test_env.yaml
@@ -40,19 +35,14 @@ jobs:
           python=${{ matrix.python-version }}
           pydantic=${{ matrix.pydantic-version }}
 
-    - name: Install conda environment without OpenMM
-      if: ${{ matrix.openmm == false }}
-      uses: mamba-org/setup-micromamba@v1
-      with:
-        environment-file: devtools/conda-envs/no_openmm.yaml
-        create-args: >-
-          python=${{ matrix.python-version }}
+    - name: Optionall install OpenMM
+      if: ${{ matrix.openmm == true }}
+      run: micromamba install openmm -c conda-forge --yes
 
     - name: Install package
       run: python -m pip install -e .
 
     - name: Run mypy
-      if: ${{ matrix.run-mypy == true }}
       run: mypy -p "openff.models"
 
     - name: Run tests
