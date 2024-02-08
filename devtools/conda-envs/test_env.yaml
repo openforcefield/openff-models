@@ -9,7 +9,6 @@ dependencies:
   - openff-utilities
   - pytest
   - pytest-cov
-  - pytest-xdist
   - pytest-randomly
   - openmm
   - mypy

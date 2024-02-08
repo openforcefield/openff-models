@@ -35,7 +35,7 @@ jobs:
           python=${{ matrix.python-version }}
           pydantic=${{ matrix.pydantic-version }}
 
-    - name: Optionall install OpenMM
+    - name: Optionally install OpenMM
       if: ${{ matrix.openmm == true }}
       run: micromamba install openmm -c conda-forge --yes
 
@@ -46,7 +46,7 @@ jobs:
       run: mypy -p "openff.models"
 
     - name: Run tests
-      run: pytest -v --cov=openff/models --cov-report=xml --color=yes openff/models/tests/
+      run: pytest -v -Werror --cov=openff/models --cov-report=xml --color=yes openff/models/tests/
 
     - name: CodeCov
       uses: codecov/codecov-action@v4
