@@ -186,12 +186,12 @@ else:
             if unit_ is Any:
                 if isinstance(val, (list, np.ndarray)):
                     # Work around a special case in which val might be list[openmm.unit.Quantity]
-                    if {type(element).__module__ for element in val} == {
-                        "openmm.unit.quantity"
-                    }:
+                    if isinstance(val, list) and {
+                        type(element).__module__ for element in val
+                    } == {"openmm.unit.quantity"}:
                         unit_ = _from_omm_quantity(val[-1]).units
                         return Quantity(
-                            [_from_omm_quantity(element) for element in val],
+                            [_from_omm_quantity(element).m for element in val],
                             units=unit_,
                         )
 
