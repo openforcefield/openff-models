@@ -9,9 +9,9 @@ dependencies:
   - openff-utilities
   - pytest
   - pytest-cov
-  - pytest-xdist
   - pytest-randomly
   - openmm
-  - mypy >=0.991
+  - mypy
+  - unyt =3
   - pip:
     - types-setuptools

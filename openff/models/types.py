@@ -4,7 +4,7 @@ import json
 from typing import TYPE_CHECKING, Any, Dict
 
 import numpy as np
-from openff.units import Quantity, unit
+from openff.units import Quantity, Unit, unit
 from openff.utilities import has_package, requires_package
 
 from openff.models.exceptions import (
@@ -74,12 +74,20 @@ else:
                     val = unit.Quantity(val).to(unit_)
                     val._magnitude = float(val._magnitude)
                     return val
+                if "unyt" in str(val.__class__):
+                    if val.value.shape == ():
+                        # this is a scalar force into an array by unyt's design
+                        if "float" in str(val.value.dtype):
+                            return float(val.value) * unit_
+                        elif "int" in str(val.value.dtype):
+                            return int(val.value) * unit_
+
                 raise UnitValidationError(
                     f"Could not validate data of type {type(val)}"
                 )
 
 
-def _is_openmm_quantity(obj: Any) -> bool:
+def _is_openmm_quantity(obj: object) -> bool:
     if has_package("openmm"):
         import openmm.unit
 
@@ -90,7 +98,7 @@ def _is_openmm_quantity(obj: Any) -> bool:
 
 
 @requires_package("openmm.unit")
-def _from_omm_quantity(val: "openmm.unit.Quantity") -> unit.Quantity:
+def _from_omm_quantity(val: "openmm.unit.Quantity") -> unit.Quantity:  # type: ignore[name-defined]
     """
     Convert float or array quantities tagged with SimTK/OpenMM units to a Pint-compatible quantity.
     """
@@ -98,15 +106,15 @@ def _from_omm_quantity(val: "openmm.unit.Quantity") -> unit.Quantity:
     val_ = val.value_in_unit(unit_)
     if type(val_) in {float, int}:
         unit_ = val.unit
-        return float(val_) * unit.Unit(str(unit_))
+        return float(val_) * Unit(str(unit_))
     # Here is where the toolkit's ValidatedList could go, if present in the environment
     elif (type(val_) in {tuple, list, np.ndarray}) or (
         type(val_).__module__ == "openmm.vec3"
     ):
         array = np.asarray(val_)
-        return array * unit.Unit(str(unit_))
+        return array * Unit(str(unit_))
     elif isinstance(val_, (float, int)) and type(val_).__module__ == "numpy":
-        return val_ * unit.Unit(str(unit_))
+        return val_ * Unit(str(unit_))
     else:
         raise UnitValidationError(
             "Found a openmm.unit.Unit wrapped around something other than a float-like "
@@ -186,12 +194,12 @@ else:
             if unit_ is Any:
                 if isinstance(val, (list, np.ndarray)):
                     # Work around a special case in which val might be list[openmm.unit.Quantity]
-                    if {type(element).__module__ for element in val} == {
-                        "openmm.unit.quantity"
-                    }:
+                    if isinstance(val, list) and {
+                        type(element).__module__ for element in val
+                    } == {"openmm.unit.quantity"}:
                         unit_ = _from_omm_quantity(val[-1]).units
                         return Quantity(
-                            [_from_omm_quantity(element) for element in val],
+                            [_from_omm_quantity(element).m for element in val],
                             units=unit_,
                         )
 
@@ -218,7 +226,17 @@ else:
                 if _is_openmm_quantity(val):
                     return _from_omm_quantity(val).to(unit_)
                 if isinstance(val, (np.ndarray, list)):
-                    return val * unit_
+                    if "unyt" in str(val.__class__):
+                        val = val.to_ndarray()
+                    try:
+                        return val * unit_
+                    except RuntimeError as error:
+                        # unyt subclasses ndarray but doesn't __mult__ with
+                        # pint.Unit objects
+                        if val.__class__.__module__.startswith("unyt"):
+                            return val.to_ndarray() * unit_
+                        else:
+                            raise error
                 if isinstance(val, bytes):
                     # Define outside loop
                     dt = np.dtype(int).newbyteorder("<")
