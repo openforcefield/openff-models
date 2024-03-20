@@ -1,17 +1,17 @@
 """Custom models for dealing with unit-bearing quantities in a Pydantic-compatible manner."""
 
 import json
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
-import numpy as np
-from openff.units import Quantity, unit
-from openff.utilities import has_package, requires_package
+import numpy
 
 from openff.models.exceptions import (
     MissingUnitError,
     UnitValidationError,
     UnsupportedExportError,
 )
+from openff.units import Quantity, Unit
+from openff.utilities import has_package, requires_package
 
 if TYPE_CHECKING:
     import openmm.unit
@@ -23,7 +23,7 @@ class _FloatQuantityMeta(type):
 
 
 if TYPE_CHECKING:
-    FloatQuantity = unit.Quantity  # np.ndarray
+    FloatQuantity = Quantity
 else:
 
     class FloatQuantity(float, metaclass=_FloatQuantityMeta):
@@ -43,8 +43,8 @@ else:
                     raise MissingUnitError(
                         f"Value {val} needs to be tagged with a unit"
                     )
-                elif isinstance(val, unit.Quantity):
-                    return unit.Quantity(val)
+                elif isinstance(val, Quantity):
+                    return Quantity(val)
                 elif _is_openmm_quantity(val):
                     return _from_omm_quantity(val)
                 else:
@@ -52,16 +52,14 @@ else:
                         f"Could not validate data of type {type(val)}"
                     )
             else:
-                unit_ = unit(unit_)
-                if isinstance(val, unit.Quantity):
+                unit_ = Unit(unit_)
+                if isinstance(val, Quantity):
                     # some custom behavior could go here
                     assert unit_.dimensionality == val.dimensionality
                     # return through converting to some intended default units (taken from the class)
                     val._magnitude = float(val.m)
                     return val.to(unit_)
-                    # could return here, without converting
-                    # (could be inconsistent with data model - heteregenous but compatible units)
-                    # return val
+
                 if _is_openmm_quantity(val):
                     return _from_omm_quantity(val).to(unit_)
                 if isinstance(val, int) and not isinstance(val, bool):
@@ -71,7 +69,7 @@ else:
                     return val * unit_
                 if isinstance(val, str):
                     # could do custom deserialization here?
-                    val = unit.Quantity(val).to(unit_)
+                    val = Quantity(val).to(unit_)
                     val._magnitude = float(val._magnitude)
                     return val
                 raise UnitValidationError(
@@ -90,7 +88,7 @@ def _is_openmm_quantity(obj: Any) -> bool:
 
 
 @requires_package("openmm.unit")
-def _from_omm_quantity(val: "openmm.unit.Quantity") -> unit.Quantity:
+def _from_omm_quantity(val: "openmm.unit.Quantity") -> Quantity:
     """
     Convert float or array quantities tagged with SimTK/OpenMM units to a Pint-compatible quantity.
     """
@@ -98,19 +96,19 @@ def _from_omm_quantity(val: "openmm.unit.Quantity") -> unit.Quantity:
     val_ = val.value_in_unit(unit_)
     if type(val_) in {float, int}:
         unit_ = val.unit
-        return float(val_) * unit.Unit(str(unit_))
+        return float(val_) * Unit(str(unit_))
     # Here is where the toolkit's ValidatedList could go, if present in the environment
-    elif (type(val_) in {tuple, list, np.ndarray}) or (
+    elif (type(val_) in {tuple, list, numpy.ndarray}) or (
         type(val_).__module__ == "openmm.vec3"
     ):
-        array = np.asarray(val_)
-        return array * unit.Unit(str(unit_))
+        array = numpy.asarray(val_)
+        return array * Unit(str(unit_))
     elif isinstance(val_, (float, int)) and type(val_).__module__ == "numpy":
-        return val_ * unit.Unit(str(unit_))
+        return val_ * Unit(str(unit_))
     else:
         raise UnitValidationError(
             "Found a openmm.unit.Unit wrapped around something other than a float-like "
-            f"or np.ndarray-like. Found a unit wrapped around type {type(val_)}."
+            f"or numpy.ndarray-like. Found a unit wrapped around type {type(val_)}."
         )
 
 
@@ -121,11 +119,11 @@ class QuantityEncoder(json.JSONEncoder):
     This is intended to operate on FloatQuantity and ArrayQuantity objects.
     """
 
-    def default(self, obj):  # noqa
-        if isinstance(obj, unit.Quantity):
+    def default(self, obj):
+        if isinstance(obj, Quantity):
             if isinstance(obj.magnitude, (float, int)):
                 data = obj.magnitude
-            elif isinstance(obj.magnitude, np.ndarray):
+            elif isinstance(obj.magnitude, numpy.ndarray):
                 data = obj.magnitude.tolist()
             else:
                 # This shouldn't ever be hit if our object models
@@ -147,7 +145,7 @@ def custom_quantity_encoder(v):
 def json_loader(data: str) -> dict:
     """Load JSON containing custom unit-tagged quantities."""
     # TODO: recursively call this function for nested models
-    out: Dict = json.loads(data)
+    out: dict = json.loads(data)
     for key, val in out.items():
         try:
             # Directly look for an encoded FloatQuantity/ArrayQuantity,
@@ -157,7 +155,7 @@ def json_loader(data: str) -> dict:
             # Handles some cases of the val being a primitive type
             continue
         # TODO: More gracefully parse non-FloatQuantity/ArrayQuantity dicts
-        unit_ = unit(v["unit"])
+        unit_ = Unit(v["unit"])
         val = v["val"]
         out[key] = unit_ * val
     return out
@@ -169,7 +167,7 @@ class _ArrayQuantityMeta(type):
 
 
 if TYPE_CHECKING:
-    ArrayQuantity = unit.Quantity  # np.ndarray
+    ArrayQuantity = Quantity
 else:
 
     class ArrayQuantity(float, metaclass=_ArrayQuantityMeta):
@@ -184,7 +182,7 @@ else:
             """Process an array tagged with units into one tagged with "OpenFF" style units."""
             unit_ = getattr(cls, "__unit__", Any)
             if unit_ is Any:
-                if isinstance(val, (list, np.ndarray)):
+                if isinstance(val, (list, numpy.ndarray)):
                     # Work around a special case in which val might be list[openmm.unit.Quantity]
                     if {type(element).__module__ for element in val} == {
                         "openmm.unit.quantity"
@@ -200,10 +198,10 @@ else:
                         f"Value {val} needs to be tagged with a unit"
                     )
 
-                elif isinstance(val, unit.Quantity):
+                elif isinstance(val, Quantity):
                     # TODO: This might be a redundant cast causing wasted CPU time.
                     #       But maybe it handles pint vs openff.units.unit?
-                    return unit.Quantity(val)
+                    return Quantity(val)
                 elif _is_openmm_quantity(val):
                     return _from_omm_quantity(val)
                 else:
@@ -211,22 +209,21 @@ else:
                         f"Could not validate data of type {type(val)}"
                     )
             else:
-                unit_ = unit(unit_)
-                if isinstance(val, unit.Quantity):
+                unit_ = Unit(unit_)
+                if isinstance(val, Quantity):
                     assert unit_.dimensionality == val.dimensionality
                     return val.to(unit_)
                 if _is_openmm_quantity(val):
                     return _from_omm_quantity(val).to(unit_)
-                if isinstance(val, (np.ndarray, list)):
+                if isinstance(val, (numpy.ndarray, list)):
                     return val * unit_
                 if isinstance(val, bytes):
                     # Define outside loop
-                    dt = np.dtype(int).newbyteorder("<")
-                    return np.frombuffer(val, dtype=dt) * unit_
+                    dt = numpy.dtype(int).newbyteorder("<")
+                    return numpy.frombuffer(val, dtype=dt) * unit_
                 if isinstance(val, str):
                     # could do custom deserialization here?
                     raise NotImplementedError
-                    #  return unit.Quantity(val).to(unit_)
                 raise UnitValidationError(
                     f"Could not validate data of type {type(val)}"
                 )

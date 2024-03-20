@@ -1,6 +1,6 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 
-from openff.units import unit
+from openff.units import Quantity
 
 try:
     from pydantic.v1 import BaseModel
@@ -17,8 +17,8 @@ class DefaultModel(BaseModel):
     class Config:
         """Custom Pydantic configuration."""
 
-        json_encoders: Dict[Any, Callable] = {
-            unit.Quantity: custom_quantity_encoder,
+        json_encoders: dict[Any, Callable] = {
+            Quantity: custom_quantity_encoder,
         }
         json_loads: Callable = json_loader
         validate_assignment: bool = True
