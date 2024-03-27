@@ -2,12 +2,12 @@ import json
 
 import numpy as np
 import pytest
+from openff.units import Quantity, unit
+from openff.utilities.testing import skip_if_missing
 
 from openff.models.exceptions import UnitValidationError
 from openff.models.models import DefaultModel
 from openff.models.types import ArrayQuantity, FloatQuantity
-from openff.units import Quantity, unit
-from openff.utilities.testing import skip_if_missing
 
 try:
     from pydantic.v1 import ValidationError
