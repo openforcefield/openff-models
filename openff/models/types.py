@@ -72,12 +72,20 @@ else:
                     val = Quantity(val).to(unit_)
                     val._magnitude = float(val._magnitude)
                     return val
+                if "unyt" in str(val.__class__):
+                    if val.value.shape == ():
+                        # this is a scalar force into an array by unyt's design
+                        if "float" in str(val.value.dtype):
+                            return float(val.value) * unit_
+                        elif "int" in str(val.value.dtype):
+                            return int(val.value) * unit_
+
                 raise UnitValidationError(
                     f"Could not validate data of type {type(val)}"
                 )
 
 
-def _is_openmm_quantity(obj: Any) -> bool:
+def _is_openmm_quantity(obj: object) -> bool:
     if has_package("openmm"):
         import openmm.unit
 
@@ -184,12 +192,12 @@ else:
             if unit_ is Any:
                 if isinstance(val, (list, numpy.ndarray)):
                     # Work around a special case in which val might be list[openmm.unit.Quantity]
-                    if {type(element).__module__ for element in val} == {
-                        "openmm.unit.quantity"
-                    }:
+                    if isinstance(val, list) and {
+                        type(element).__module__ for element in val
+                    } == {"openmm.unit.quantity"}:
                         unit_ = _from_omm_quantity(val[-1]).units
                         return Quantity(
-                            [_from_omm_quantity(element) for element in val],
+                            [_from_omm_quantity(element).m for element in val],
                             units=unit_,
                         )
 
@@ -216,7 +224,17 @@ else:
                 if _is_openmm_quantity(val):
                     return _from_omm_quantity(val).to(unit_)
                 if isinstance(val, (numpy.ndarray, list)):
-                    return val * unit_
+                    if "unyt" in str(val.__class__):
+                        val = val.to_ndarray()
+                    try:
+                        return val * unit_
+                    except RuntimeError as error:
+                        # unyt subclasses ndarray but doesn't __mult__ with
+                        # pint.Unit objects
+                        if val.__class__.__module__.startswith("unyt"):
+                            return val.to_ndarray() * unit_
+                        else:
+                            raise error
                 if isinstance(val, bytes):
                     # Define outside loop
                     dt = numpy.dtype(int).newbyteorder("<")

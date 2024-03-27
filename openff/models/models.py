@@ -1,14 +1,8 @@
 from typing import Any, Callable
 
-from openff.units import Quantity
-
-try:
-    from pydantic.v1 import BaseModel
-except ImportError:
-    from pydantic import BaseModel
-
-
+from openff.models._pydantic import BaseModel
 from openff.models.types import custom_quantity_encoder, json_loader
+from openff.units import Quantity
 
 
 class DefaultModel(BaseModel):

@@ -184,15 +184,15 @@ class TestQuantityTypes:
             doses: ArrayQuantity["milligram"]
 
         subject = Subject(
-            age=20.0,
+            age=20.0,  # here would be a good place to test IntQuantity if it ever exists
             height=170.0 * unyt.cm,
             doses=[2, 1, 1] * unyt.gram,
         )
 
         # Ensure unyt scalars (unyt.unyt_quantity) are stored as floats
-        assert subject.age.m is float
-        assert subject.height.m is float
-        assert subject.doses.m is np.ndarray
+        assert type(subject.age.m) is float
+        assert type(subject.height.m) is float
+        assert type(subject.doses.m) is np.ndarray
 
     @skip_if_missing("unyt")
     @skip_if_missing("openmm.unit")
