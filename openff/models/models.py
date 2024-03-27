@@ -1,8 +1,9 @@
 from typing import Any, Callable
 
+from openff.units import Quantity
+
 from openff.models._pydantic import BaseModel
 from openff.models.types import custom_quantity_encoder, json_loader
-from openff.units import Quantity
 
 
 class DefaultModel(BaseModel):
