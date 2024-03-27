@@ -10,7 +10,6 @@ dependencies:
   - pytest
   - pytest-cov
   - pytest-randomly
-  - openmm
   - mypy
   - unyt =3
   - pip:

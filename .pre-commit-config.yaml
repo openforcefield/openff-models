@@ -9,7 +9,7 @@ repos:
   - id: trailing-whitespace
   - id: debug-statements
 - repo: https://github.com/psf/black
-  rev: 24.1.1
+  rev: 24.3.0
   hooks:
   - id: black
     files: ^openff
@@ -29,10 +29,14 @@ repos:
         'flake8-pytest-style',
         'flake8-no-pep420',
     ]
+- repo: https://github.com/asottile/yesqa
+  rev: v1.5.0
+  hooks:
+  - id: yesqa
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.15.0
+  rev: v3.15.1
   hooks:
   - id: pyupgrade
     files: ^openff
     exclude: openff/models/_version.py|setup.py
-    args: [--py38-plus]
+    args: [--py39-plus]
