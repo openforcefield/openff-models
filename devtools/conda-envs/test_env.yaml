@@ -4,7 +4,7 @@ channels:
 dependencies:
   - python
   - pip
-  - pydantic
+  - pydantic =2
   - openff-units
   - openff-utilities
   - pytest

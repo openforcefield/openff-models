@@ -2,17 +2,21 @@ import json
 
 import numpy as np
 import pytest
-from openff.units import Quantity, unit
-from openff.utilities.testing import skip_if_missing
+from pydantic import ValidationError
 
+from openff.models.annotated_types import (
+    AngleQuantity,
+    ChargeQuantity,
+    DistanceQuantity,
+    LengthQuantity,
+    OnlyAMUQuantity,
+)
 from openff.models.exceptions import UnitValidationError
 from openff.models.models import DefaultModel
 from openff.models.types import ArrayQuantity, FloatQuantity
-
-try:
-    from pydantic.v1 import ValidationError
-except ImportError:
-    from pydantic import ValidationError
+from openff.units import Quantity, unit
+from openff.units.openmm import from_openmm
+from openff.utilities.testing import skip_if_missing
 
 
 class TestQuantityTypes:
