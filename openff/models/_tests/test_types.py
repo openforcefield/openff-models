@@ -25,15 +25,15 @@ class TestQuantityTypes:
         import openmm.unit
 
         class Atom(DefaultModel):
-            mass: FloatQuantity["atomic_mass_constant"]
-            charge: FloatQuantity["elementary_charge"]
-            foo: FloatQuantity
-            fuu: FloatQuantity
-            bar: FloatQuantity["degree"]
-            barint: FloatQuantity["degree"]
-            baz: FloatQuantity["nanometer"]
-            qux: FloatQuantity["nanometer"]
-            quix: FloatQuantity["nanometer"]
+            mass: OnlyAMUQuantity
+            charge: ChargeQuantity
+            foo: Quantity
+            fuu: Quantity
+            bar: AngleQuantity
+            barint: AngleQuantity
+            baz: LengthQuantity
+            qux: DistanceQuantity
+            quix: LengthQuantity
             quux: int
             fnord: float
             fum: str
@@ -44,7 +44,7 @@ class TestQuantityTypes:
             mass=4,
             charge=0 * unit.elementary_charge,
             foo=2.0 * unit.nanometer,
-            fuu=2.0 * openmm.unit.nanometer,
+            fuu=from_openmm(2.0 * openmm.unit.nanometer),  # hack
             bar="90.0 degree",
             barint="90 degree",
             baz=0.4 * openmm.unit.nanometer,
@@ -58,17 +58,17 @@ class TestQuantityTypes:
         )
 
         assert a.mass == 4.0 * unit.atomic_mass_constant
-        assert a.charge == 0.0 * unit.elementary_charge
-        assert isinstance(a.charge.m, float)
+        assert a.charge == 0 * unit.elementary_charge  # this previously was 0.0
+        assert isinstance(a.charge.m, int)  # was previously coerced to float
         assert a.foo == 2.0 * unit.nanometer
         assert a.fuu == 2.0 * unit.nanometer
         assert a.bar == 90 * unit.degree
-        assert a.barint == 90.0 * unit.degree
-        assert isinstance(a.barint.m, float)
+        assert a.barint == 90 * unit.degree  # previously was 90.0
+        assert isinstance(a.barint.m, int)  # was previously coerced to float
         assert a.baz == 0.4 * unit.nanometer
         assert a.qux == 0.4 * unit.nanometer
         assert a.quix == 2.0 * unit.nanometer
-        assert isinstance(a.quix.m, float)
+        assert isinstance(a.quix.m, int)
         assert a.quux == 1
         assert a.fnord == 4.2
         assert a.fum == "fum"
@@ -76,16 +76,16 @@ class TestQuantityTypes:
         assert a.fred == {"baz": 2}
 
         # TODO: Update with custom deserialization to == a.dict()
-        assert json.loads(a.json()) == {
-            "mass": '{"val": 4.0, "unit": "atomic_mass_constant"}',
-            "charge": '{"val": 0.0, "unit": "elementary_charge"}',
+        assert json.loads(a.model_dump_json()) == {
+            "mass": '{"val": 4, "unit": "unified_atomic_mass_unit"}',
+            "charge": '{"val": 0, "unit": "elementary_charge"}',
             "foo": '{"val": 2.0, "unit": "nanometer"}',
             "fuu": '{"val": 2.0, "unit": "nanometer"}',
             "bar": '{"val": 90.0, "unit": "degree"}',
-            "barint": '{"val": 90.0, "unit": "degree"}',
+            "barint": '{"val": 90, "unit": "degree"}',
             "baz": '{"val": 0.4, "unit": "nanometer"}',
             "qux": '{"val": 0.4, "unit": "nanometer"}',
-            "quix": '{"val": 2.0, "unit": "nanometer"}',
+            "quix": '{"val": 2, "unit": "nanometer"}',
             "quux": 1,
             "fnord": 4.2,
             "fum": "fum",
@@ -93,10 +93,10 @@ class TestQuantityTypes:
             "fred": {"baz": 2},
         }
 
-        parsed = Atom.parse_raw(a.json())
+        parsed = Atom.model_validate_json(a.model_dump_json())
         assert a == parsed
 
-        assert Atom(**a.dict()) == a
+        assert Atom(**a.model_dump()) == a
 
     @pytest.mark.parametrize("val", [True, [1]])
     def test_bad_float_quantity_type(self, val):
