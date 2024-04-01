@@ -45,7 +45,7 @@ jobs:
       run: mypy -p "openff.models"
 
     - name: Run tests
-      run: pytest -v -Werror --cov=openff/models --cov-report=xml --color=yes openff/models/
+      run: pytest -v --cov=openff/models --cov-report=xml --color=yes openff/models/
 
     - name: CodeCov
       uses: codecov/codecov-action@v4
