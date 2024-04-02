@@ -11,7 +11,8 @@ class DefaultModel(BaseModel):
         "json_encoders": {
             Quantity: custom_quantity_encoder,
         },
-        "json_loads": json_loader,  # removed in V2, not sure where this went
+        # removed in V2, not sure where this went
+        "json_loads": json_loader,  # type: ignore[typeddict-unknown-key]
         "validate_assignment": True,
         "arbitrary_types_allowed": True,
     }

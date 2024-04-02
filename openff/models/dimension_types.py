@@ -7,7 +7,7 @@ from pydantic import AfterValidator, BeforeValidator
 try:
     from openmm.unit import Quantity as OpenMMQuantity
 except ImportError:
-    OpenMMQuantity = Any
+    OpenMMQuantity = Any  # type: ignore
 
 
 def to_quantity(quantity: Quantity | str | OpenMMQuantity) -> Quantity:
@@ -28,9 +28,9 @@ def has_compatible_dimensionality(quantity: Quantity, unit: str) -> Quantity:
         raise ValueError(f"Dimensionality must be compatible with unit {unit}")
 
 
-def build_dimension_type(unit: str) -> type[Annotated]:
+def build_dimension_type(unit: str) -> type[Quantity]:
     """Return an Annotated type for dimensnional compatibility with a unit."""
-    return Annotated[
+    return Annotated[  # type: ignore[return-value]
         Quantity,
         BeforeValidator(to_quantity),
         AfterValidator(partial(has_compatible_dimensionality, unit=unit)),

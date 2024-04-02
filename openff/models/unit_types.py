@@ -9,7 +9,7 @@ from pydantic import BeforeValidator
 try:
     from openmm.unit import Quantity as OpenMMQuantity
 except ImportError:
-    OpenMMQuantity = Any
+    OpenMMQuantity = Any  # type: ignore
 
 
 def quack_into_unit(
@@ -62,8 +62,8 @@ def quack_into_unit(
         raise ValueError
 
 
-def build_unit_type(unit: str) -> type[Annotated]:
-    return Annotated[
+def build_unit_type(unit: str) -> type[Quantity]:
+    return Annotated[  # type: ignore[return-value]
         Quantity,
         BeforeValidator(partial(quack_into_unit, unit=unit)),
     ]
