@@ -38,7 +38,7 @@ pprint(atom.dict())
 # {'charge': <Quantity(0.0, 'elementary_charge')>,
 #  'mass': <Quantity(12.011, 'unified_atomic_mass_unit')>,
 #  'some_array': <Quantity([ 4 -1  0], 'nanometer')>}
-# 
+#
 
 # Note that unit-bearing fields use custom serialization into a dict with separate key-val pairs for
 # the unit (as a string) and unitless quantities (in whatever shape the data is)
@@ -49,7 +49,7 @@ pprint(atom.json())
 #  '\\"nanometer\\"}"}')
 
 # The same thing, just more human-readable
-pprint.pprint(json.loads(atom.json()))
+pprint(json.loads(atom.json()))
 # {'charge': '{"val": 0.0, "unit": "elementary_charge"}',
 #  'mass': '{"val": 12.011, "unit": "unified_atomic_mass_unit"}',
 #  'some_array': '{"val": [4, -1, 0], "unit": "nanometer"}'}
@@ -70,6 +70,7 @@ from openff.models.models import DefaultModel
 
 class Atom(DefaultModel):
     mass: unit.Quantity = unit.Quantity(0.0, unit.amu)
+
 
 json.loads(Atom(mass=12.011 * unit.atomic_mass_constant).json())
 # {'mass': '{"val": 12.011, "unit": "atomic_mass_constant"}'}

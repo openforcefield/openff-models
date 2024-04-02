@@ -25,7 +25,6 @@ class FloatQuantity:
     pass
 
 
-@pytest.mark.skip(reason="Behavior needs to be rewritten into new classes")
 class TestAnnotatedTypes:
     @skip_if_missing("openmm.unit")
     def test_float_quantity_model(self):
@@ -105,14 +104,14 @@ class TestAnnotatedTypes:
 
         assert Atom(**a.model_dump()) == a
 
-    @pytest.mark.parametrize("val", [True, [1]])
-    def test_bad_float_quantity_type(self, val):
+    @pytest.mark.parametrize("val", [True])
+    def test_cannot_process_bool(self, val):
         class Model(DefaultModel):
-            a: FloatQuantity["atomic_mass_constant"]  # noqa
+            a: OnlyAMUQuantity
 
         with pytest.raises(
             ValidationError,
-            match=r"Could not validate data of type .*[bool|list].*",
+            match=r"input_type=bool",
         ):
             Model(a=val)
 

@@ -44,14 +44,17 @@ def quack_into_unit(
 
         try:
             return Quantity(quantity).to(unit)
-        except DimensionalityError as error:
+        except (DimensionalityError, TypeError) as error:
             # should catch other errors here, too, since a lot of stuff can error out
             # from being passed to the Quantity constructor
             raise ValueError from error
 
     elif isinstance(quantity, (list, numpy.ndarray, float, int)):
 
-        return Quantity(quantity, unit)
+        try:
+            return Quantity(quantity, unit)
+        except (DimensionalityError, TypeError) as error:
+            raise ValueError from error
 
     elif isinstance(quantity, bytes):
 

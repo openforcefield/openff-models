@@ -6,18 +6,10 @@ from openff.units import Quantity, unit
 from openff.utilities.testing import skip_if_missing
 from pydantic import ValidationError
 
+from openff.models.dimension_types import LengthQuantity, MassQuantity, TimeQuantity
 from openff.models.models import DefaultModel
 
 
-class ArrayQuantity:
-    pass
-
-
-class FloatQuantity:
-    pass
-
-
-@pytest.mark.skip(reason="Behavior needs to be rewritten into new classes")
 class TestQuantityTypes:
     @skip_if_missing("openmm.unit")
     def test_array_quantity_tuples(self):
@@ -26,7 +18,7 @@ class TestQuantityTypes:
         import openmm.unit
 
         class BoxModel(DefaultModel):
-            box_vectors: ArrayQuantity["nanometer"]
+            box_vectors: LengthQuantity
 
         as_tuple = ((4, 0, 0), (0, 4, 0), (0, 0, 4)) * openmm.unit.nanometer
         as_array = numpy.eye(3) * 4 * openmm.unit.nanometer
@@ -36,36 +28,25 @@ class TestQuantityTypes:
             BoxModel(box_vectors=as_array).box_vectors,
         )
 
-    @pytest.mark.parametrize("val", [True, 1])
-    def test_bad_array_quantity_type(self, val):
-
-        class Model(DefaultModel):
-            a: ArrayQuantity["atomic_mass_constant"]
-
-        with pytest.raises(
-            ValidationError, match=r"Could not validate data of type .*[bool|int].*"
-        ):
-            Model(a=val)
-
     @skip_if_missing("unyt")
     def test_unyt_quantities(self):
         import unyt
 
         class Subject(DefaultModel):
-            age: FloatQuantity["year"]
-            height: FloatQuantity["centimeter"]
-            doses: ArrayQuantity["milligram"]
+            age: TimeQuantity
+            height: LengthQuantity
+            weight: MassQuantity
 
         subject = Subject(
-            age=20.0,  # here would be a good place to test IntQuantity if it ever exists
+            age=Quantity(20.0, "year"),
             height=170.0 * unyt.cm,
-            doses=[2, 1, 1] * unyt.gram,
+            weight=[100, 110, 80] * unyt.kilogram,
         )
 
         # Ensure unyt scalars (unyt.unyt_quantity) are stored as floats
         assert type(subject.age.m) is float
         assert type(subject.height.m) is float
-        assert type(subject.doses.m) is numpy.ndarray
+        assert type(subject.weight.m) is numpy.ndarray
 
     @skip_if_missing("unyt")
     @skip_if_missing("openmm.unit")
@@ -74,10 +55,10 @@ class TestQuantityTypes:
         import unyt
 
         class SimpleModel(DefaultModel):
-            data: ArrayQuantity["second"]
+            data: TimeQuantity
 
-        reference = SimpleModel(data=[3, 2, 1])
-        model = SimpleModel(**reference.dict())
+        reference = SimpleModel(data=Quantity([3, 2, 1], "second"))
+        model = SimpleModel(**reference.model_dump())
 
         for new_data in [
             [3, 2, 1] * unit.second,
@@ -90,21 +71,21 @@ class TestQuantityTypes:
 
     def test_float_and_quantity_type(self):
         class MixedModel(DefaultModel):
-            scalar_data: FloatQuantity
-            array_data: ArrayQuantity
+            scalar_data: LengthQuantity
+            array_data: LengthQuantity
             name: str
 
         m = MixedModel(
             scalar_data=1.0 * unit.meter, array_data=[-1, 0] * unit.second, name="foo"
         )
 
-        assert json.loads(m.json()) == {
+        assert json.loads(m.model_dump_json()) == {
             "scalar_data": '{"val": 1.0, "unit": "meter"}',
             "array_data": '{"val": [-1, 0], "unit": "second"}',
             "name": "foo",
         }
 
-        parsed = MixedModel.parse_raw(m.json())
+        parsed = MixedModel.model_validate_json(m.model_dump_json())
 
         for key in m.dict().keys():
             try:
@@ -112,34 +93,10 @@ class TestQuantityTypes:
             except ValueError:
                 assert all(getattr(m, key) == getattr(parsed, key))
 
-    def test_model_missing_units(self):
-        class ImplicitModel(DefaultModel):
-            implicit_float: FloatQuantity = None
-            implicit_array: ArrayQuantity = None
-            explicit_float: FloatQuantity["dimensionless"] = None
-            explicit_array: ArrayQuantity["dimensionless"] = None
-
-        # Ensure the model can be constructed with units passed to implicit-unit fields
-        m = ImplicitModel(
-            implicit_float=4 * unit.dimensionless,
-            implicit_array=[4] * unit.dimensionless,
-            explicit_float=4,
-            explicit_array=[4],
-        )
-
-        assert m.implicit_float == m.explicit_float
-        assert m.implicit_array[0] == m.implicit_array
-
-        with pytest.raises(ValidationError, match=r"Value 4.0 .*a unit.*"):
-            ImplicitModel(implicit_float=4.0)
-
-        with pytest.raises(ValidationError, match=r".*Value \[4.0\].*a unit.*"):
-            ImplicitModel(implicit_array=[4.0])
-
     def test_model_mutability(self):
         class Model(DefaultModel):
-            time: FloatQuantity["second"]
-            lengths: ArrayQuantity["nanometer"]
+            time: TimeQuantity
+            lengths: LengthQuantity
 
         m = Model(time=10 * unit.second, lengths=[0.3, 0.5] * unit.nanometer)
 
@@ -197,7 +154,7 @@ def test_from_omm_box_vectors():
         openmm.unit.Quantity(openmm.Vec3(x=0, y=0, z=5), openmm.unit.nanometer),
     ]
 
-    validated = ArrayQuantity.validate_type(box_vectors)
+    validated = LengthQuantity.validate_type(box_vectors)
 
     assert isinstance(validated, Quantity)
 
