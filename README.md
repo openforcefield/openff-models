@@ -9,49 +9,59 @@ Helper classes for Pydantic compatibility in the OpenFF stack
 
 ### Getting started
 
-```python3
-import pprint
+```python
+from pprint import pprint
 import json
 
 from openff.models.models import DefaultModel
-from openff.models.types import ArrayQuantity, FloatQuantity
-from openff.units import unit
+from openff.models.dimension_types import LengthQuantity
+from openff.models.unit_types import (
+    OnlyAMUQuantity,
+    OnlyElementaryChargeQuantity,
+)
+from openff.units import Quantity, unit
 
 
 class Atom(DefaultModel):
-    mass: FloatQuantity["atomic_mass_constant"]
-    charge: FloatQuantity["elementary_charge"]
-    some_array: ArrayQuantity["nanometer"]
+    mass: OnlyAMUQuantity
+    charge: OnlyElementaryChargeQuantity
+    some_array: LengthQuantity
 
 
 atom = Atom(
-    mass=12.011 * unit.atomic_mass_constant,
+    mass=Quantity(12.011, "atomic_mass_constant"),
     charge=0.0 * unit.elementary_charge,
-    some_array=unit.Quantity([4, -1, 0], unit.nanometer),
+    some_array=Quantity([4, -1, 0], "nanometer"),
 )
 
-print(atom.dict())
-# {'mass': <Quantity(12.011, 'atomic_mass_constant')>, 'charge': <Quantity(0.0, 'elementary_charge')>, 'some_array': <Quantity([ 4 -1  0], 'nanometer')>}
+pprint(atom.dict())
+# {'charge': <Quantity(0.0, 'elementary_charge')>,
+#  'mass': <Quantity(12.011, 'unified_atomic_mass_unit')>,
+#  'some_array': <Quantity([ 4 -1  0], 'nanometer')>}
+# 
 
 # Note that unit-bearing fields use custom serialization into a dict with separate key-val pairs for
 # the unit (as a string) and unitless quantities (in whatever shape the data is)
-print(atom.json())
-# {"mass": "{\"val\": 12.011, \"unit\": \"atomic_mass_constant\"}", "charge": "{\"val\": 0.0, \"unit\": \"elementary_charge\"}", "some_array": "{\"val\": [4, -1, 0], \"unit\": \"nanometer\"}"}
+pprint(atom.json())
+# ('{"mass":"{\\"val\\": 12.011, \\"unit\\": '
+#  '\\"unified_atomic_mass_unit\\"}","charge":"{\\"val\\": 0.0, \\"unit\\": '
+#  '\\"elementary_charge\\"}","some_array":"{\\"val\\": [4, -1, 0], \\"unit\\": '
+#  '\\"nanometer\\"}"}')
 
 # The same thing, just more human-readable
 pprint.pprint(json.loads(atom.json()))
 # {'charge': '{"val": 0.0, "unit": "elementary_charge"}',
-#  'mass': '{"val": 12.011, "unit": "atomic_mass_constant"}',
+#  'mass': '{"val": 12.011, "unit": "unified_atomic_mass_unit"}',
 #  'some_array': '{"val": [4, -1, 0], "unit": "nanometer"}'}
 
-# Can also roundtrip through these representations
+# Can also roundtrip through dict/JSON representations
 assert Atom(**atom.dict()).charge.m == 0.0
 assert Atom.parse_raw(atom.json()).charge.m == 0.0
 ```
 
 Currently, models can also be defined with a simple `unit.Quantity` annotation. This keeps serialization functionality but does not pick up the validaiton features of the custom types, i.e. dimensionality validation.
 
-```python3
+```python
 import json
 
 from openff.units import unit
