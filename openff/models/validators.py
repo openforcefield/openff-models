@@ -13,7 +13,7 @@ except ImportError:
 try:
     from unyt import unyt_quantity as UnytQuantity
 except ImportError:
-    UnytQuantity = Any  # type: ignore
+    UnytQuantity = Any
 
 
 def from_unyt(unyt_quantity: Any) -> Quantity:
