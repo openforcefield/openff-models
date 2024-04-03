@@ -31,7 +31,7 @@ def test_molecule_model():
     assert molecule.charges.sum().m == 0.0
 
 
-@pytest.mark.parametrize("unit", ['nanometer', 'angstrom'])
+@pytest.mark.parametrize("unit", ["nanometer", "angstrom"])
 def test_from_omm_box_vectors(unit):
     """Reproduce issue #35."""
 
