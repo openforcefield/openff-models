@@ -3,10 +3,10 @@ import pytest
 from openff.units import Unit
 
 from openff.models.models import DefaultModel
-from openff.models.unit_types import OnlyAMUQuantity, OnlyElementaryChargeQuantity
+from openff.models.types.unit_types import OnlyAMUQuantity, OnlyElementaryChargeQuantity
 
 
-def test_():
+def test_molecule_model():
     class Molecule(DefaultModel):
         masses: OnlyAMUQuantity
         charges: OnlyElementaryChargeQuantity

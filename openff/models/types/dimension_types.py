@@ -21,7 +21,7 @@ def has_compatible_dimensionality(quantity: Quantity, unit: str) -> Quantity:
 
 
 def build_dimension_type(unit: str) -> type[Quantity]:
-    """Return an Annotated type for dimensnional compatibility with a unit."""
+    """Return an Annotated type for dimensional compatibility with a unit."""
     return Annotated[  # type: ignore[return-value]
         Quantity,
         WrapValidator(coerce_json_back_to_quantity),
@@ -29,6 +29,7 @@ def build_dimension_type(unit: str) -> type[Quantity]:
     ]
 
 
+# TODO: Decide which dimensions to ship by default
 (
     LengthQuantity,
     MassQuantity,

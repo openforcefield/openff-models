@@ -3,7 +3,7 @@ from typing import Any
 from openff.units import Quantity, Unit
 from pydantic import ValidationInfo, ValidatorFunctionWrapHandler
 
-from openff.models.types import json_loader
+from openff.models.types.serialization import json_loader
 
 try:
     from openmm.unit import Quantity as OpenMMQuantity
