@@ -33,14 +33,14 @@ def quack_into_unit(
 
         return from_openmm(quantity).to(unit)
 
-    elif isinstance(quantity, Quantity):
+    if isinstance(quantity, Quantity):
 
         try:
             return quantity.to(unit)
         except DimensionalityError as error:
             raise ValueError from error
 
-    elif isinstance(quantity, str):
+    if isinstance(quantity, str):
 
         try:
             return Quantity(quantity).to(unit)
@@ -49,20 +49,29 @@ def quack_into_unit(
             # from being passed to the Quantity constructor
             raise ValueError from error
 
-    elif isinstance(quantity, (list, numpy.ndarray, float, int)):
+    if isinstance(quantity, list):
+        # need to special case list[openmm.unit.Quantity] for a special
+        # case with box vectors from OpenMM objects
+        if {str(type(element).__module__) for element in quantity} == {
+            "openmm.unit.quantity"
+        }:
+            from openff.units.openmm import from_openmm
+
+            return from_openmm(quantity).to(unit)
+
+    if isinstance(quantity, (list, numpy.ndarray, float, int)):
 
         try:
             return Quantity(quantity, unit)
         except (DimensionalityError, TypeError) as error:
             raise ValueError from error
 
-    elif isinstance(quantity, bytes):
+    if isinstance(quantity, bytes):
 
         dt = numpy.dtype(int).newbyteorder("<")
         return Quantity(numpy.frombuffer(quantity, dtype=dt), unit)
 
-    else:
-        raise ValueError
+    raise ValueError
 
 
 def build_unit_type(unit: str) -> type[Quantity]:
