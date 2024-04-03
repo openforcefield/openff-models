@@ -3,7 +3,7 @@ from typing import Any
 from openff.units import Quantity, Unit
 from pydantic import ValidationInfo, ValidatorFunctionWrapHandler
 
-from openff.models.types.serialization import json_loader
+from openff.models.types.serialization import dict_to_quantity, json_loader
 
 try:
     from openmm.unit import Quantity as OpenMMQuantity
@@ -11,9 +11,9 @@ except ImportError:
     OpenMMQuantity = Any  # type: ignore
 
 try:
-    from unyt import unyt_quantity as unyt
+    from unyt import unyt_quantity as UnytQuantity
 except ImportError:
-    unyt = Any
+    UnytQuantity = Any  # type: ignore
 
 
 def from_unyt(unyt_quantity: Any) -> Quantity:
@@ -32,7 +32,9 @@ def to_quantity(quantity: Quantity | str | OpenMMQuantity) -> Quantity:
 
 
 def coerce_json_back_to_quantity(
-    v: Any, handler: ValidatorFunctionWrapHandler, info: ValidationInfo
+    v: dict | str | Quantity | OpenMMQuantity | UnytQuantity,
+    handler: ValidatorFunctionWrapHandler,
+    info: ValidationInfo,
 ) -> Quantity:
     if info.mode == "json":
         if isinstance(v, str):
@@ -43,7 +45,7 @@ def coerce_json_back_to_quantity(
 
     if info.mode == "python":
         if isinstance(v, dict):
-            return to_quantity(Quantity(*v.values()))
+            return dict_to_quantity(v)
         elif isinstance(v, Quantity):
             return to_quantity(v)
         elif "openmm" in v.__class__.__module__:

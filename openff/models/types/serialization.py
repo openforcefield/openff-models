@@ -53,3 +53,14 @@ def json_loader(data: str) -> dict:
         val = v["val"]
         out[key] = unit_ * val
     return out
+
+
+def dict_to_quantity(data: dict) -> Quantity:
+    """Convert a dictionary of structure like {"val": 1.0, "unit": "angstrom"} to a Quantity."""
+    if len(data) == 2:
+        try:
+            return Quantity(data["val"], data["unit"])
+        except KeyError as error:
+            raise ValueError(f"bad keys {data.keys()}") from error
+    else:
+        raise ValueError("Dictionary must have exactly two keys 'val' and 'unit'")
