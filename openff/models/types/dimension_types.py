@@ -31,7 +31,9 @@ def build_dimension_type(unit: str) -> type[Quantity]:
 
 # TODO: Decide which dimensions to ship by default
 (
+    DimensionlessQuantity,
     LengthQuantity,
+    VelocityQuantity,
     MassQuantity,
     TimeQuantity,
     DegreeQuantity,
@@ -41,7 +43,9 @@ def build_dimension_type(unit: str) -> type[Quantity]:
 ) = (
     build_dimension_type(unit)
     for unit in [
+        "dimensionless",
         "angstrom",
+        "angstrom/picosecond",
         "dalton",
         "second",
         "degree",
