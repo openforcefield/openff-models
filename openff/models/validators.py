@@ -56,9 +56,15 @@ def coerce_json_back_to_quantity(
         elif "unyt" in v.__class__.__module__:
             return from_unyt(v)
 
+        if isinstance(v, str):
+            try:
+                return Quantity(*json_loader(v).values())
+            except Exception as error:
+                raise ValueError("str types need to be of the structure that can be imported back from JSON") from error
+
         else:
             raise ValueError(
-                f"In Python mode the input must be a dict! Found {type(v)}"
+                f"In Python mode the input must be a dict, Quantity, string or similar! Found {type(v)}"
             )
 
     return v

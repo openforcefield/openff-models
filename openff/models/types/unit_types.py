@@ -85,11 +85,13 @@ def build_unit_type(unit: str) -> type[Quantity]:
     OnlyAMUQuantity,
     OnlyDegreeQuantity,
     OnlyElementaryChargeQuantity,
+    NanometerQuantity,
 ) = (
     build_unit_type(unit)
     for unit in [
         "amu",
         "degree",
         "elementary_charge",
+        "nanometer",
     ]
 )
