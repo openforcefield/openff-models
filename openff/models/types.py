@@ -4,10 +4,10 @@ import json
 from typing import TYPE_CHECKING
 
 import numpy
-
-from openff.models.exceptions import UnitValidationError, UnsupportedExportError
 from openff.units import Quantity, Unit
 from openff.utilities import has_package, requires_package
+
+from openff.models.exceptions import UnitValidationError, UnsupportedExportError
 
 if TYPE_CHECKING:
     import openmm.unit

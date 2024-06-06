@@ -2,11 +2,11 @@ import json
 
 import numpy
 import pytest
+from openff.units import Quantity, unit
+from openff.utilities.testing import skip_if_missing
 from pydantic import ValidationError
 
 from openff.models.models import DefaultModel
-from openff.units import Quantity, unit
-from openff.utilities.testing import skip_if_missing
 
 
 class ArrayQuantity:

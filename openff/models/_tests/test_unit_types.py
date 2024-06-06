@@ -1,9 +1,9 @@
 import numpy
 import pytest
+from openff.units import Unit
 
 from openff.models.models import DefaultModel
 from openff.models.unit_types import OnlyAMUQuantity, OnlyElementaryChargeQuantity
-from openff.units import Unit
 
 
 def test_():

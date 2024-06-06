@@ -1,9 +1,8 @@
 from functools import partial
 from typing import Annotated, Any
 
-from pydantic import AfterValidator, BeforeValidator
-
 from openff.units import Quantity
+from pydantic import AfterValidator, BeforeValidator
 
 try:
     from openmm.unit import Quantity as OpenMMQuantity

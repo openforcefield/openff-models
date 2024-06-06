@@ -1,11 +1,11 @@
 import re
 
 import pytest
+from openff.units import Quantity, Unit
 from pydantic import ValidationError
 
 from openff.models.dimension_types import LengthQuantity, build_dimension_type
 from openff.models.models import DefaultModel
-from openff.units import Quantity, Unit
 
 
 def test_length_quantity():

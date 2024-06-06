@@ -2,6 +2,9 @@ import json
 
 import numpy as np
 import pytest
+from openff.units import Quantity, unit
+from openff.units.openmm import from_openmm
+from openff.utilities.testing import skip_if_missing
 from pydantic import ValidationError
 
 from openff.models.dimension_types import (
@@ -16,9 +19,6 @@ from openff.models.unit_types import (
     OnlyDegreeQuantity,
     OnlyElementaryChargeQuantity,
 )
-from openff.units import Quantity, unit
-from openff.units.openmm import from_openmm
-from openff.utilities.testing import skip_if_missing
 
 
 class FloatQuantity:

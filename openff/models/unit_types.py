@@ -2,10 +2,9 @@ from functools import partial
 from typing import Annotated, Any
 
 import numpy
+from openff.units import Quantity
 from pint import DimensionalityError
 from pydantic import BeforeValidator
-
-from openff.units import Quantity
 
 try:
     from openmm.unit import Quantity as OpenMMQuantity
