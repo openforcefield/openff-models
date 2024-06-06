@@ -60,7 +60,9 @@ def coerce_json_back_to_quantity(
             try:
                 return Quantity(*json_loader(v).values())
             except Exception as error:
-                raise ValueError("str types need to be of the structure that can be imported back from JSON") from error
+                raise ValueError(
+                    "str types need to be of the structure that can be imported back from JSON"
+                ) from error
 
         else:
             raise ValueError(
