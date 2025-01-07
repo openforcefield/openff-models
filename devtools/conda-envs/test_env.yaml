@@ -4,7 +4,7 @@ channels:
 dependencies:
   - python
   - pip
-  - pydantic
+  - pydantic =2
   - openff-units
   - openff-utilities
   - pytest
@@ -14,3 +14,4 @@ dependencies:
   - unyt =3
   - pip:
     - types-setuptools
+    - git+https://github.com/openforcefield/openff-units.git@main
