@@ -28,7 +28,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install conda environment without OpenMM
-      uses: mamba-org/setup-micromamba@v1
+      uses: mamba-org/setup-micromamba@v2
       with:
         environment-file: devtools/conda-envs/test_env.yaml
         create-args: >-
