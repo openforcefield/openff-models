@@ -14,14 +14,13 @@ defaults:
 
 jobs:
   test:
-    name: Test on ${{ matrix.os }}, Python ${{ matrix.python-version }}, OpenMM ${{ matrix.openmm }}, Pydantic ${{ matrix.pydantic-version }}
+    name: Test on ${{ matrix.os }}, Python ${{ matrix.python-version }}, OpenMM ${{ matrix.openmm }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [macOS-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]
         python-version: ["3.10", "3.11", "3.12"]
-        pydantic-version: ["1", "2"]
         openmm: [true, false]
 
     steps:
@@ -33,21 +32,20 @@ jobs:
         environment-file: devtools/conda-envs/test_env.yaml
         create-args: >-
           python=${{ matrix.python-version }}
-          pydantic=${{ matrix.pydantic-version }}
 
     - name: Optionally install OpenMM
       if: ${{ matrix.openmm == true }}
-      run: micromamba install openmm -c conda-forge --yes
+      run: micromamba install "openmm =8.1" -c conda-forge --yes
 
     - name: Install package
       run: python -m pip install -e .
 
     - name: Run mypy
-      if: ${{ matrix.python-version == 3.10 && matrix.pydantic-version == 2}}
+      if: ${{ matrix.python-version == 3.10 }}
       run: mypy -p "openff.models"
 
     - name: Run tests
-      run: pytest -v -Werror --cov=openff/models --cov-report=xml --color=yes openff/models/
+      run: python -m pytest -v -Werror --cov=openff/models --cov-report=xml --color=yes openff/models/
 
     - name: CodeCov
       uses: codecov/codecov-action@v4
