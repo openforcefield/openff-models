@@ -5,7 +5,7 @@ dependencies:
   - python
   - pip
   - pydantic
-  - openff-units
+  - openff-units =0.2
   - openff-utilities
   - pytest
   - pytest-cov
